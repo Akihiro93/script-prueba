@@ -39,7 +39,9 @@ if opcional_1 == "Y":
             elif opcional_1_2 not in ['Y', 'N']:
                 print("Opción inválida. Por favor ingresa 'Y' o 'N'")
         numero_de_comienzo = 1
-    scripts_funciones.descargar_imagenes_desde_csv("resultados/enlaces.csv", nombre, numero_de_comienzo, nombre_carpeta)
+    ruta_imagenes = scripts_funciones.descargar_imagenes_desde_csv("resultados/enlaces.csv", nombre, numero_de_comienzo, nombre_carpeta)
+else:
+    ruta_imagenes = None
 
 
 
@@ -58,7 +60,11 @@ if opcional_2 == "Y":
                 exit()
             elif opcional_1_2 not in ['Y', 'N']:
                 print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-    scripts_funciones.descargar_videos_gifs_desde_csv("resultados/enlaces.csv", nombre_carpeta, nombre, numero_de_comienzo)
-
+    ruta_videos_1, ruta_gif_1 = scripts_funciones.descargar_videos_gifs_desde_csv("resultados/enlaces.csv", nombre_carpeta, nombre, numero_de_comienzo)
+    print("Descarga completada de los videos y gifs del archivo: resultados/enlaces.csv")
 else:
+    ruta_videos_1 = None
+    ruta_gif_1 = None
     print("Terminado la tarea")
+
+scripts_funciones.comprimir_carpeta("Raiden", ruta_imagenes, ruta_videos_1, ruta_gif_1)
