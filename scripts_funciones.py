@@ -19,7 +19,7 @@ def obtener_todos_los_enlaces(url):
     # configurar el controlador de Brave
     brave_path = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
     # reemplaza la ruta con la ruta a tu archivo BraveDriver.exe
-    brave_driver_path = "D:\chromedriver_win32\chromedriver.exe"
+    brave_driver_path = "C:\Users\kryst\chromedriver_win32\chromedriver.exe"
     options = webdriver.ChromeOptions()
     options.binary_location = brave_path
     options.add_argument('--disable-extensions')
