@@ -78,7 +78,7 @@ def filtrar_enlaces(ruta_csv):
         rows = [row for row in csv_reader if not (row[0].startswith('https://www.reddit.com/login') or any(link in row[0] for link in ['https://www.redditinc.com/policies/user-agreement',
             'https://www.redditinc.com/policies/privacy-policy',
             'https://www.redditinc.com/policies/content-policy',
-            'https://www.redditinc.com/policies/moderator-guidelines']))]
+            'https://www.redditinc.com/policies/moderator-guidelines'])) or row[0].endswith(",False")]
 
     with open(ruta_csv, 'w', newline='') as file:
         csv_writer = csv.writer(file)
@@ -86,6 +86,26 @@ def filtrar_enlaces(ruta_csv):
 
     return print("Enlaces filtrados y guardados en el archivo", ruta_csv)
 
+import pandas as pd
+
+def separa_enlaces_videos(ruta_csv):
+    # Crea un objeto DataFrame para leer el archivo CSV
+    df = pd.read_csv(ruta_csv, header=None, names=["enlace"], delimiter=",")
+
+    # Crea una nueva columna en el DataFrame para marcar los enlaces que comienzan con "https:/example/"
+    df["is_example"] = df["enlace"].str.startswith(("https://www.redgifs.com/", "https://www.reddit.com/gallery/"))
+
+    # Filtra el DataFrame para seleccionar solo las filas que tienen el valor False en la columna "is_example"
+    df_filtered = df[df["is_example"] == False]
+
+    # Guarda los enlaces filtrados en un nuevo archivo CSV llamado "links_separados.csv" dentro de la carpeta "resultados"
+    df_example = df[df["is_example"] == True]
+    df_example.to_csv("resultados/links_separados.csv", index=False)
+
+    # Sobrescribe el archivo original con los enlaces filtrados
+    df_filtered.to_csv(ruta_csv, index=False, header=False)
+
+    return print("Enlaces que no se pueden descargar, separados y guardados en el archivo", ruta_csv)
 
 def descargar_imagenes_desde_csv(ruta_csv, nombre_base='imagen', numero_inicial=1, carpeta_resultados='resultados'):
     # Crear carpeta para guardar las imágenes
@@ -194,4 +214,34 @@ def comprimir_carpeta(nombre_carpeta_comprimida, ruta_carpeta_imagenes=None, rut
                 for file in files:
                     zipf.write(os.path.join(root, file))
 
+        # Comprimir archivos enlaces.csv y links_separados.csv
+        if os.path.exists('resultados/enlaces.csv'):
+            zipf.write('resultados/enlaces.csv')
+        if os.path.exists('resultados/links_separados.csv'):
+            zipf.write('resultados/links_separados.csv')
+
     print('Carpetas comprimidas exitosamente')
+
+def retirar_archivos (nombre_carpeta_1 = None, nombre_carpeta_2 = None):
+    contador = 0
+    if nombre_carpeta_1 != None:
+        shutil.rmtree("resultados/imagenes/" + nombre_carpeta_1)
+        contador += 1
+
+    if nombre_carpeta_2 != None:
+        shutil.rmtree("resultados/media/" + nombre_carpeta_2)
+        contador += 1
+    
+    ruta_enlaces = os.path.join("resultados", "enlaces.csv")
+    ruta_links = os.path.join("resultados", "links_separados.csv")
+
+    if os.path.exists(ruta_enlaces):
+        os.remove(ruta_enlaces)
+
+    if os.path.exists(ruta_links):
+        os.remove(ruta_links)
+
+    if contador != 2:
+        return print("Carpeta retirada")
+    else:
+        return print("Carpetas retiradas")
