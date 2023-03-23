@@ -2,13 +2,18 @@ import scripts_funciones
 
 
 para_buscar = input("El enlace de la pagina: ")
-scripts_funciones.obtener_enlaces(para_buscar)
-scripts_funciones.filtrar_enlaces("resultados/enlaces.csv")
-scripts_funciones.separa_enlaces_videos("resultados/enlaces.csv")
+
+opcional_1_1 = ''
 opcional_1 = ''
 opcional_2 = ''
 opcional_3 = ''
 
+while opcional_1_1 not in ['Y', 'N']:
+    opcional_1_1 = input("¿Quieres que se se use la función avanzada para login en redes sociales? [Y/N]\n")
+    if opcional_1_1.lower() == 'exit':
+        exit()
+    elif opcional_1_1 not in ['Y', 'N']:
+        print("Opción inválida. Por favor ingresa 'Y' o 'N'")
 
 while opcional_1 not in ['Y', 'N']:
     opcional_1 = input("¿Quieres que se descarguen las imagenes? [Y/N]\n")
@@ -33,6 +38,19 @@ while opcional_3 not in ['Y', 'N']:
     elif opcional_3 not in ['Y', 'N']:
         print("Opción inválida. Por favor ingresa 'Y' o 'N'")
 
+if opcional_1_1 == "Y":
+    url_1 = "https://www.reddit.com/login/"
+    url_2 = "https://www.reddit.com/user/Akihiro9/saved/"
+    usuario_1 = "Akihiro9"
+    contraseña_1 = "TLq9JHzg*q%n1JpR"
+    scripts_funciones.obtener_todos_los_enlaces(url_1, url_2, usuario_1, contraseña_1)
+else:
+    scripts_funciones.obtener_enlaces(para_buscar)
+
+scripts_funciones.filtrar_enlaces("resultados/enlaces.csv")
+# scripts_funciones.filtrar("resultados/enlaces.csv")
+# scripts_funciones.eliminar_enlaces_duplicados('resultados/enlaces.csv')
+scripts_funciones.separa_enlaces_videos("resultados/enlaces.csv")
 
 if opcional_1 == "Y":
     nombre_carpeta_1 = input("Nombre para carpeta de las imagenes: ")

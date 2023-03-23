@@ -3,52 +3,65 @@ import shutil
 import io
 from PIL import Image
 import csv
-import requests
 import os
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
 import numpy as np
+import time
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 
-def obtener_todos_los_enlaces(url):
+def obtener_todos_los_enlaces(url_1, url_2, usuario, password):
     enlaces = []
 
     # configurar el controlador de Brave
     brave_path = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
-    # reemplaza la ruta con la ruta a tu archivo BraveDriver.exe
-    brave_driver_path = "C:\Users\kryst\chromedriver_win32\chromedriver.exe"
+    brave_driver_path = "C:\\Users\\kryst\\chromedriver_win32\\chromedriver.exe"
     options = webdriver.ChromeOptions()
     options.binary_location = brave_path
     options.add_argument('--disable-extensions')
     options.add_argument('--disable-infobars')
     options.add_argument('--incognito=false')
     driver = webdriver.Chrome(
-        options=options, executable_path=brave_driver_path)
+    options=options, executable_path=brave_driver_path)
 
-    driver.get(url)
+# iniciar sesión
+    driver.get(url_1)
+    username = WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="username"]')))
+    password_1 = WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="password"]')))
+    username.clear()
+    password_1.clear()
+    username.send_keys(usuario)
+    password_1.send_keys(password)
+    time.sleep(7)
+    #button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.AnimatedForm[type="submit"]')))
+    #button.click()  # Hace clic en el botón
+    #* button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.AnimatedForm__submitButton[type="submit"]')))
 
-    # desplazarse hasta el final de la página
-    while True:
-        last_height = driver.execute_script(
-            "return document.body.scrollHeight")
-        driver.execute_script(
-            "window.scrollTo(0, document.body.scrollHeight);")
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
-            break
-        last_height = new_height
+    # guardar enlaces en un archivo CSV
+    if not os.path.exists("resultados"):
+        os.makedirs("resultados")
 
-    # extraer todos los enlaces de la página
+    # obtener los enlaces guardados del usuario
+    driver.get(url_2)
+    time.sleep(5)
     soup = BeautifulSoup(driver.page_source, "html.parser")
     for link in soup.findAll("a"):
         data = link.get("href")
         if data and "https" in data:
+            if data.endswith(",False"):
+                data = data[:-6]
             enlaces.append(data)
 
     # guardar enlaces en un archivo CSV
+    if not os.path.exists("resultados"):
+        os.makedirs("resultados")
     np.savetxt("resultados/enlaces.csv", enlaces, delimiter=',', fmt="%s")
 
     # cerrar el navegador
@@ -66,6 +79,8 @@ def obtener_enlaces(url):
     for link in soup.findAll("a"):
         data = link.get("href")
         if "https" in data:
+            if data.endswith(',False'):
+                data = data.replace(',False', '') # reemplaza ",False" con una cadena vacía
             enlaces.append(data)
 
     np.savetxt("resultados/enlaces.csv", enlaces, delimiter=',', fmt="%s")
@@ -78,7 +93,13 @@ def filtrar_enlaces(ruta_csv):
         rows = [row for row in csv_reader if not (row[0].startswith('https://www.reddit.com/login') or any(link in row[0] for link in ['https://www.redditinc.com/policies/user-agreement',
             'https://www.redditinc.com/policies/privacy-policy',
             'https://www.redditinc.com/policies/content-policy',
-            'https://www.redditinc.com/policies/moderator-guidelines'])) or row[0].endswith(",False")]
+            'https://www.redditinc.com/policies/moderator-guidelines',
+            'https://ads.reddit.com?utm_source=d2x_consumer&utm_name=top_nav_cta',
+            'https://www.reddit.com/chat']))]
+
+    # Eliminar ",False" del final de los enlaces
+    for i in range(len(rows)):
+        rows[i][0] = rows[i][0].rstrip(',False')
 
     with open(ruta_csv, 'w', newline='') as file:
         csv_writer = csv.writer(file)
@@ -86,7 +107,22 @@ def filtrar_enlaces(ruta_csv):
 
     return print("Enlaces filtrados y guardados en el archivo", ruta_csv)
 
-import pandas as pd
+def eliminar_enlaces_duplicados(ruta_archivo):
+    # Abre el archivo CSV y lee las filas
+    with open(ruta_archivo, newline='', encoding='utf-8') as archivo_csv:
+        lector_csv = csv.reader(archivo_csv)
+        enlaces = [fila[0] for fila in lector_csv]
+
+    # Elimina los duplicados de la lista de enlaces
+    enlaces_unicos = list(set(enlaces))
+
+    # Sobrescribe el archivo original con los enlaces únicos
+    with open(ruta_archivo, 'w', newline='', encoding='utf-8') as archivo_csv:
+        escritor_csv = csv.writer(archivo_csv)
+        for enlace in enlaces_unicos:
+            escritor_csv.writerow([enlace])
+    return print("Quitado los enlaces filtrados")
+
 
 def separa_enlaces_videos(ruta_csv):
     # Crea un objeto DataFrame para leer el archivo CSV
@@ -121,8 +157,9 @@ def descargar_imagenes_desde_csv(ruta_csv, nombre_base='imagen', numero_inicial=
     ruta_imagenes = os.path.join('resultados', 'imagenes', carpeta_resultados)
 
     contador = numero_inicial
-    with open(ruta_csv, 'r') as file:
+    with open(ruta_csv, 'r') as file, open(os.path.join(carpeta_resultados_imagenes, 'links_separados.csv'), 'w', newline='') as links_file:
         csv_reader = csv.reader(file)
+        csv_writer = csv.writer(links_file)
         next(csv_reader)
         for row in csv_reader:
             url_extension = os.path.splitext(row[0])[1]
@@ -142,11 +179,11 @@ def descargar_imagenes_desde_csv(ruta_csv, nombre_base='imagen', numero_inicial=
                         image_file.write(response.content)
                     contador += 1
                 except:
-                    # si la imagen no se puede cargar, ignoramos este archivo y continuamos con el siguiente
+                    # si la imagen no se puede cargar, imprimimos un mensaje de error y continuamos con el siguiente archivo
                     print(f"Error al descargar la imagen: {row[0]}")
+                    csv_writer.writerow([row[0]])
                     continue
-    print(
-        f"Descarga completada de las imágenes del archivo: {ruta_csv}"), ruta_imagenes
+    print(f"Descarga completada de las imágenes del archivo: {ruta_csv}")
 
 
 def descargar_videos_gifs_desde_csv(ruta_csv, nombre_carpeta='carpeta_personalizada', nombre_base='media_', numero_inicial=1):
@@ -245,3 +282,27 @@ def retirar_archivos (nombre_carpeta_1 = None, nombre_carpeta_2 = None):
         return print("Carpeta retirada")
     else:
         return print("Carpetas retiradas")
+    
+
+def filtrar (ruta_csv):
+    enlaces_filtrados = []
+    with open(ruta_csv, 'r') as file:
+        csv_reader = csv.reader(file)
+        for row in csv_reader:
+            enlace = row[0].strip()
+            if not enlace.startswith('https://www.reddit.com/login') and not any(link in enlace for link in ['https://www.redditinc.com/policies/user-agreement',
+                'https://www.redditinc.com/policies/privacy-policy',
+                'https://www.redditinc.com/policies/content-policy',
+                'https://www.redditinc.com/policies/moderator-guidelines',
+                'https://ads.reddit.com?utm_source=d2x_consumer&utm_name=top_nav_cta',
+                'https://www.reddit.com/chat',
+                'https://i.imgur.com/9NW0AiX.png']):
+                if enlace.endswith(",False"):
+                    enlace = enlace[:-6]
+                enlaces_filtrados.append([enlace])
+
+    with open(ruta_csv, 'w', newline='') as file:
+        csv_writer = csv.writer(file)
+        csv_writer.writerows(enlaces_filtrados)
+
+    return print("Enlaces filtrados y guardados en el archivo", ruta_csv)
