@@ -1,6 +1,5 @@
 import scripts_funciones
 
-
 para_buscar = input("El enlace de la pagina: ")
 
 opcional_1_1 = ''
@@ -48,8 +47,8 @@ else:
     scripts_funciones.obtener_enlaces(para_buscar)
 
 scripts_funciones.filtrar_enlaces("resultados/enlaces.csv")
-# scripts_funciones.filtrar("resultados/enlaces.csv")
-# scripts_funciones.eliminar_enlaces_duplicados('resultados/enlaces.csv')
+scripts_funciones.corregir_enlaces_csv("resultados/enlaces.csv")
+scripts_funciones.eliminar_enlaces_duplicados('resultados/enlaces.csv')
 scripts_funciones.separa_enlaces_videos("resultados/enlaces.csv")
 
 if opcional_1 == "Y":
@@ -101,15 +100,15 @@ else:
     nombre_carpeta_2 = None
 
 if opcional_3 == "Y":
-    opcional_1_2 = ""
+    opcional_1_3 = ""
     nombre_zip = input("Nombre para el archivo zip: ")
     scripts_funciones.comprimir_carpeta(
         nombre_zip, ruta_imagenes, ruta_videos_1, ruta_gif_1)
-    while opcional_1_2 not in ['Y', 'N']:
-        opcional_1_2 = input("Desea eliminar los archivos [Y/N]\n")
-        if opcional_1_2 == "Y":
+    while opcional_1_3 not in ['Y', 'N']:
+        opcional_1_3 = input("Desea eliminar los archivos [Y/N]\n")
+        if opcional_1_3 == "Y":
             scripts_funciones.retirar_archivos (nombre_carpeta_1, nombre_carpeta_2)
-        elif opcional_1_2 not in ['Y', 'N']:
+        elif opcional_1_3 not in ['Y', 'N']:
             print("Opción inválida. Por favor ingresa 'Y' o 'N'")
     print("Terminado la tarea")
 else:

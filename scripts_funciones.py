@@ -79,8 +79,6 @@ def obtener_enlaces(url):
     for link in soup.findAll("a"):
         data = link.get("href")
         if "https" in data:
-            if data.endswith(',False'):
-                data = data.replace(',False', '') # reemplaza ",False" con una cadena vacía
             enlaces.append(data)
 
     np.savetxt("resultados/enlaces.csv", enlaces, delimiter=',', fmt="%s")
@@ -121,7 +119,7 @@ def eliminar_enlaces_duplicados(ruta_archivo):
         escritor_csv = csv.writer(archivo_csv)
         for enlace in enlaces_unicos:
             escritor_csv.writerow([enlace])
-    return print("Quitado los enlaces filtrados")
+    return print("Quitado los enlaces duplicados")
 
 
 def separa_enlaces_videos(ruta_csv):
@@ -282,27 +280,20 @@ def retirar_archivos (nombre_carpeta_1 = None, nombre_carpeta_2 = None):
         return print("Carpeta retirada")
     else:
         return print("Carpetas retiradas")
-    
 
-def filtrar (ruta_csv):
-    enlaces_filtrados = []
+def corregir_enlaces_csv(ruta_csv):
     with open(ruta_csv, 'r') as file:
         csv_reader = csv.reader(file)
+        rows = []
         for row in csv_reader:
-            enlace = row[0].strip()
-            if not enlace.startswith('https://www.reddit.com/login') and not any(link in enlace for link in ['https://www.redditinc.com/policies/user-agreement',
-                'https://www.redditinc.com/policies/privacy-policy',
-                'https://www.redditinc.com/policies/content-policy',
-                'https://www.redditinc.com/policies/moderator-guidelines',
-                'https://ads.reddit.com?utm_source=d2x_consumer&utm_name=top_nav_cta',
-                'https://www.reddit.com/chat',
-                'https://i.imgur.com/9NW0AiX.png']):
-                if enlace.endswith(",False"):
-                    enlace = enlace[:-6]
-                enlaces_filtrados.append([enlace])
+            if row[0].endswith(',False'):
+                row[0] = row[0][:-6]
+            rows.append(row)
 
     with open(ruta_csv, 'w', newline='') as file:
         csv_writer = csv.writer(file)
-        csv_writer.writerows(enlaces_filtrados)
+        csv_writer.writerows(rows)
 
-    return print("Enlaces filtrados y guardados en el archivo", ruta_csv)
+    nombre_archivo = os.path.basename(ruta_csv)
+    print(f"Enlaces corregidos y guardados en el archivo {nombre_archivo}")
+
