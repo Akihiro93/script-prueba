@@ -108,8 +108,11 @@ def corregir_enlaces_txt(ruta_txt):
         print(f"No se encontró el archivo en la ruta: {ruta_txt}")
         return
 
-    with open(ruta_txt, 'r') as archivo_txt, open('resultados/enlaces_corregidos.txt', 'w') as archivo_nuevo:
-        for linea in archivo_txt:
+    with open(ruta_txt, 'r') as archivo_txt:
+        lineas = archivo_txt.readlines()
+
+    with open(ruta_txt, 'w') as archivo_txt:
+        for linea in lineas:
             # quitar los caracteres de nueva línea y espacios en blanco al final de la línea
             linea = linea.rstrip()
 
@@ -121,10 +124,12 @@ def corregir_enlaces_txt(ruta_txt):
             if linea.endswith(','):
                 linea = linea[:-1]
 
-            # escribir la línea corregida en el archivo nuevo
-            archivo_nuevo.write(linea + '\n')
+            # escribir la línea corregida en el archivo original
+            archivo_txt.write(linea + '\n')
 
             print(f"Línea escrita en archivo: {linea}")
+
+    print(f"Archivo {ruta_txt} corregido y sobrescrito.")
 
 
 def eliminar_duplicados(ruta_txt):
@@ -137,34 +142,6 @@ def eliminar_duplicados(ruta_txt):
         f.write('\n'.join(filtered_rows))
 
     return print("Enlaces duplicados eliminados y archivo sobrescrito")
-
-
-def separa_enlaces_videos(ruta_txt):
-    # Lee el archivo de texto línea por línea
-    with open(ruta_txt, "r") as f:
-        lines = f.readlines()
-
-    # Crea un objeto DataFrame a partir de las líneas del archivo de texto
-    df = pd.DataFrame({"enlace": lines})
-
-    # Elimina los saltos de línea de la columna "enlace"
-    df["enlace"] = df["enlace"].str.strip()
-
-    # Crea una nueva columna en el DataFrame para marcar los enlaces que comienzan con "https:/example/"
-    df["is_example"] = df["enlace"].str.startswith(
-        ("https://www.redgifs.com/", "https://www.reddit.com/gallery/"))
-
-    # Filtra el DataFrame para seleccionar solo las filas que tienen el valor False en la columna "is_example"
-    df_filtered = df[df["is_example"] == False]
-
-    # Guarda los enlaces filtrados en un nuevo archivo de texto llamado "links_filtrados.txt" dentro de la carpeta "resultados"
-    df_filtered["enlace"].to_csv(
-        "resultados/links_filtrados.txt", index=False, header=False)
-
-    # Sobrescribe el archivo original con los enlaces filtrados
-    df_filtered["enlace"].to_csv(ruta_txt, index=False, header=False)
-
-    return print("Enlaces que no se pueden descargar, separados y guardados en el archivo", ruta_txt)
 
 
 def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta_resultados='resultados'):
@@ -265,22 +242,22 @@ def comprimir_archivos(nombre_carpeta_comprimida, ruta_carpeta_imagenes='imagene
                     zipf.write(os.path.join(root, file), arcname=os.path.join(nombre_carpeta_comprimida, 'imagenes', file))
 
         # Comprimir videos
-        if os.path.exists(ruta_carpeta_videos):
-            for root, dirs, files in os.walk(ruta_carpeta_videos):
-                for file in files:
-                    zipf.write(os.path.join(root, file), arcname=os.path.join(nombre_carpeta_comprimida, 'videos', file))
+        if ruta_carpeta_videos != None:
+            if os.path.exists(ruta_carpeta_videos):
+                for root, dirs, files in os.walk(ruta_carpeta_videos):
+                    for file in files:
+                        zipf.write(os.path.join(root, file), arcname=os.path.join(nombre_carpeta_comprimida, 'videos', file))
 
         # Comprimir gifs
-        if os.path.exists(ruta_carpeta_gifs):
-            for root, dirs, files in os.walk(ruta_carpeta_gifs):
-                for file in files:
-                    zipf.write(os.path.join(root, file), arcname=os.path.join(nombre_carpeta_comprimida, 'gifs', file))
+        if ruta_carpeta_gifs != None:
+            if os.path.exists(ruta_carpeta_gifs):
+                for root, dirs, files in os.walk(ruta_carpeta_gifs):
+                    for file in files:
+                        zipf.write(os.path.join(root, file), arcname=os.path.join(nombre_carpeta_comprimida, 'gifs', file))
 
         # Comprimir archivos enlaces.csv y links_separados.csv
         if os.path.exists('resultados/enlaces.txt'):
             zipf.write('resultados/enlaces.txt', arcname=os.path.join(nombre_carpeta_comprimida, 'enlaces.txt'))
-        if os.path.exists('resultados/links_filtrados.txt'):
-            zipf.write('resultados/links_filtrados.txt', arcname=os.path.join(nombre_carpeta_comprimida, 'links_filtrados.txt'))
             
     print(f'Archivo {nombre_carpeta_comprimida}.zip creado en la carpeta resultados/')
 
@@ -296,14 +273,10 @@ def retirar_archivos(nombre_carpeta_1=None, nombre_carpeta_2=None):
         shutil.rmtree("resultados/media/" + nombre_carpeta_2)
         contador += 1
 
-    ruta_enlaces = os.path.join("resultados", "enlaces.csv")
-    ruta_links = os.path.join("resultados", "links_separados.csv")
+    ruta_enlaces = os.path.join("resultados", "enlaces.txt")
 
     if os.path.exists(ruta_enlaces):
         os.remove(ruta_enlaces)
-
-    if os.path.exists(ruta_links):
-        os.remove(ruta_links)
 
     if contador != 2:
         return print("Carpeta retirada")

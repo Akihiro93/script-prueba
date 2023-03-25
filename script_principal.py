@@ -27,7 +27,6 @@ else:
 scripts_funciones.filtrar_enlaces("resultados/enlaces.txt")
 scripts_funciones.corregir_enlaces_txt("resultados/enlaces.txt")
 scripts_funciones.eliminar_duplicados('resultados/enlaces.txt')
-scripts_funciones.separa_enlaces_videos("resultados/enlaces.txt")
 
 while opcional_1 not in ['Y', 'N']:
     opcional_1 = input("¿Quieres que se descarguen las imagenes? [Y/N]\n")
@@ -56,7 +55,6 @@ if opcional_1 == "Y":
         numero_de_comienzo = 1
     ruta_imagenes = scripts_funciones.descargar_imagenes(
         "resultados/enlaces.txt", nombre, numero_de_comienzo, nombre_carpeta_1)
-    print(ruta_imagenes)
 else:
     ruta_imagenes = None
     nombre_carpeta_1 = None
