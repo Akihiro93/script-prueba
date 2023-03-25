@@ -1,40 +1,18 @@
 import scripts_funciones
-
 para_buscar = input("El enlace de la pagina: ")
+
 
 opcional_1_1 = ''
 opcional_1 = ''
 opcional_2 = ''
 opcional_3 = ''
+opcional_1_2_1 = 0
 
 while opcional_1_1 not in ['Y', 'N']:
     opcional_1_1 = input("¿Quieres que se se use la función avanzada para login en redes sociales? [Y/N]\n")
     if opcional_1_1.lower() == 'exit':
         exit()
     elif opcional_1_1 not in ['Y', 'N']:
-        print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-
-while opcional_1 not in ['Y', 'N']:
-    opcional_1 = input("¿Quieres que se descarguen las imagenes? [Y/N]\n")
-    if opcional_1.lower() == 'exit':
-        exit()
-    elif opcional_1 not in ['Y', 'N']:
-        print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-
-while opcional_2 not in ['Y', 'N']:
-    opcional_2 = input(
-        "¿Quieres que se descarguen los videos y gifts? [Y/N]\n")
-    if opcional_2.lower() == 'exit':
-        exit()
-    elif opcional_2 not in ['Y', 'N']:
-        print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-
-while opcional_3 not in ['Y', 'N']:
-    opcional_3 = input(
-        "¿Quieres que se compriman las carpetas [Y/N]\n")
-    if opcional_3.lower() == 'exit':
-        exit()
-    elif opcional_3 not in ['Y', 'N']:
         print("Opción inválida. Por favor ingresa 'Y' o 'N'")
 
 if opcional_1_1 == "Y":
@@ -46,10 +24,18 @@ if opcional_1_1 == "Y":
 else:
     scripts_funciones.obtener_enlaces(para_buscar)
 
-scripts_funciones.filtrar_enlaces("resultados/enlaces.csv")
-scripts_funciones.corregir_enlaces_csv("resultados/enlaces.csv")
-scripts_funciones.eliminar_enlaces_duplicados('resultados/enlaces.csv')
-scripts_funciones.separa_enlaces_videos("resultados/enlaces.csv")
+scripts_funciones.filtrar_enlaces("resultados/enlaces.txt")
+scripts_funciones.corregir_enlaces_txt("resultados/enlaces.txt")
+scripts_funciones.eliminar_duplicados('resultados/enlaces.txt')
+scripts_funciones.separa_enlaces_videos("resultados/enlaces.txt")
+
+while opcional_1 not in ['Y', 'N']:
+    opcional_1 = input("¿Quieres que se descarguen las imagenes? [Y/N]\n")
+    if opcional_1.lower() == 'exit':
+        exit()
+    elif opcional_1 not in ['Y', 'N']:
+        print("Opción inválida. Por favor ingresa 'Y' o 'N'")
+
 
 if opcional_1 == "Y":
     nombre_carpeta_1 = input("Nombre para carpeta de las imagenes: ")
@@ -68,12 +54,21 @@ if opcional_1 == "Y":
             elif opcional_1_2 not in ['Y', 'N']:
                 print("Opción inválida. Por favor ingresa 'Y' o 'N'")
         numero_de_comienzo = 1
-    ruta_imagenes = scripts_funciones.descargar_imagenes_desde_csv(
-        "resultados/enlaces.csv", nombre, numero_de_comienzo, nombre_carpeta_1)
+    ruta_imagenes = scripts_funciones.descargar_imagenes(
+        "resultados/enlaces.txt", nombre, numero_de_comienzo, nombre_carpeta_1)
+    print(ruta_imagenes)
 else:
     ruta_imagenes = None
     nombre_carpeta_1 = None
+    opcional_1_2_1 += 1
 
+while opcional_2 not in ['Y', 'N']:
+    opcional_2 = input(
+        "¿Quieres que se descarguen los videos y gifts? [Y/N]\n")
+    if opcional_2.lower() == 'exit':
+        exit()
+    elif opcional_2 not in ['Y', 'N']:
+        print("Opción inválida. Por favor ingresa 'Y' o 'N'")
 
 if opcional_2 == "Y":
     nombre_carpeta_2 = input("Nombre para carpeta de los medios: ")
@@ -91,25 +86,37 @@ if opcional_2 == "Y":
                 exit()
             elif opcional_1_2 not in ['Y', 'N']:
                 print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-    ruta_videos_1, ruta_gif_1 = scripts_funciones.descargar_videos_gifs_desde_csv(
-        "resultados/enlaces.csv", nombre_carpeta_2, nombre, numero_de_comienzo)
-    print("Descarga completada de los videos y gifs del archivo: resultados/enlaces.csv")
+    ruta_videos_1, ruta_gif_1 = scripts_funciones.descargar_videos_gifs(
+        "resultados/enlaces.txt", nombre_carpeta_2, nombre, numero_de_comienzo)
+    print("Descarga completada de los videos y gifs del archivo")
 else:
     ruta_videos_1 = None
     ruta_gif_1 = None
     nombre_carpeta_2 = None
+    opcional_1_2_1 += 1
 
-if opcional_3 == "Y":
-    opcional_1_3 = ""
-    nombre_zip = input("Nombre para el archivo zip: ")
-    scripts_funciones.comprimir_carpeta(
-        nombre_zip, ruta_imagenes, ruta_videos_1, ruta_gif_1)
-    while opcional_1_3 not in ['Y', 'N']:
-        opcional_1_3 = input("Desea eliminar los archivos [Y/N]\n")
-        if opcional_1_3 == "Y":
-            scripts_funciones.retirar_archivos (nombre_carpeta_1, nombre_carpeta_2)
-        elif opcional_1_3 not in ['Y', 'N']:
+if opcional_1_2_1 != 2:
+    while opcional_3 not in ['Y', 'N']:
+        opcional_3 = input(
+            "¿Quieres que se compriman las carpetas [Y/N]\n")
+        if opcional_3.lower() == 'exit':
+            exit()
+        elif opcional_3 not in ['Y', 'N']:
             print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-    print("Terminado la tarea")
+
+if opcional_1_2_1 != 2:
+    if opcional_3 == "Y":
+        opcional_1_3 = ""
+        nombre_zip = input("Nombre para el archivo zip: ")
+        scripts_funciones.comprimir_archivos(nombre_zip, ruta_imagenes, ruta_videos_1, ruta_gif_1)
+        while opcional_1_3 not in ['Y', 'N']:
+            opcional_1_3 = input("Desea eliminar los archivos [Y/N]\n")
+            if opcional_1_3 == "Y":
+                scripts_funciones.retirar_archivos (nombre_carpeta_1, nombre_carpeta_2)
+            elif opcional_1_3 not in ['Y', 'N']:
+                print("Opción inválida. Por favor ingresa 'Y' o 'N'")
+        print("Terminado la tarea")
+    else:
+        print("Terminado la tarea")
 else:
-    print("Terminado la tarea")
+    print('Terminado la tarea')
