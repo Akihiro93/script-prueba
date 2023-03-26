@@ -1,17 +1,19 @@
+import os
 import zipfile
 import shutil
 import io
+import requests
 from PIL import Image
-import os
+import imagehash
 import pandas as pd
 from bs4 import BeautifulSoup
-import requests
 import numpy as np
 import time
 from selenium import webdriver
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 def obtener_todos_los_enlaces(url_1, url_2, usuario, password):
@@ -23,12 +25,11 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password):
     options = webdriver.ChromeOptions()
     options.binary_location = brave_path
     options.add_argument('--disable-extensions')
-    options.add_argument('--disable-infobars')
-    options.add_argument('--incognito=false')
+    options.add_argument('--incognito')
     driver = webdriver.Chrome(
         options=options, executable_path=brave_driver_path)
 
-# iniciar sesión
+    # iniciar sesión
     driver.get(url_1)
     username = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="username"]')))
@@ -38,18 +39,23 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password):
     password_1.clear()
     username.send_keys(usuario)
     password_1.send_keys(password)
-    time.sleep(7)
-    # button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.AnimatedForm[type="submit"]')))
-    # button.click()  # Hace clic en el botón
-    # * button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.AnimatedForm__submitButton[type="submit"]')))
-
-    # guardar enlaces en un archivo CSV
-    if not os.path.exists("resultados"):
-        os.makedirs("resultados")
+    time.sleep(8)
 
     # obtener los enlaces guardados del usuario
     driver.get(url_2)
-    time.sleep(5)
+    time.sleep(8)
+    last_height = driver.execute_script("return document.body.scrollHeight")
+    while True:
+        # Hacer scroll hasta el final de la página
+        driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);")
+        # Esperar a que se cargue la página
+        time.sleep(2)
+        # Obtener el nuevo alto de la página
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
+            break
+        last_height = new_height
     soup = BeautifulSoup(driver.page_source, "html.parser")
     for link in soup.findAll("a"):
         data = link.get("href")
@@ -58,15 +64,17 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password):
                 data = data[:-6]
             enlaces.append(data)
 
-    # guardar enlaces en un archivo CSV
+    # guardar enlaces en un archivo de texto
     if not os.path.exists("resultados"):
         os.makedirs("resultados")
-    np.savetxt("resultados/enlaces.csv", enlaces, delimiter=',', fmt="%s")
+    with open("resultados/enlaces.txt", "w") as f:
+        for enlace in enlaces:
+            f.write(enlace + "\n")
 
     # cerrar el navegador
-    driver.close()
+    driver.quit()
 
-    return print("Archivo CSV de enlaces creado")
+    return print("Archivo de texto de enlaces creado")
 
 
 def obtener_enlaces(url):
@@ -144,7 +152,7 @@ def eliminar_duplicados(ruta_txt):
     return print("Enlaces duplicados eliminados y archivo sobrescrito")
 
 
-def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta_resultados='resultados'):
+def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta_resultados='resultados', umbral=5, imagen_comparar=None):
     # Crear carpeta para guardar las imágenes
     carpeta_imagenes = os.path.join('resultados', 'imagenes')
     if not os.path.exists(carpeta_imagenes):
@@ -170,7 +178,7 @@ def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta
                         extension = '.jpg'
                     else:
                         extension = '.jpg'
-                    filename = f"{nombre_base}_{contador:03d}{extension}"
+                    filename = f"{nombre_base}_{contador:04d}{extension}"
                     filepath = os.path.join(
                         carpeta_resultados_imagenes, filename)
                     with open(filepath, 'wb') as image_file:
@@ -239,28 +247,32 @@ def comprimir_archivos(nombre_carpeta_comprimida, ruta_carpeta_imagenes='imagene
         if os.path.exists(ruta_carpeta_imagenes):
             for root, dirs, files in os.walk(ruta_carpeta_imagenes):
                 for file in files:
-                    zipf.write(os.path.join(root, file), arcname=os.path.join(nombre_carpeta_comprimida, 'imagenes', file))
+                    zipf.write(os.path.join(root, file), arcname=os.path.join(
+                        nombre_carpeta_comprimida, 'imagenes', file))
 
         # Comprimir videos
         if ruta_carpeta_videos != None:
             if os.path.exists(ruta_carpeta_videos):
                 for root, dirs, files in os.walk(ruta_carpeta_videos):
                     for file in files:
-                        zipf.write(os.path.join(root, file), arcname=os.path.join(nombre_carpeta_comprimida, 'videos', file))
+                        zipf.write(os.path.join(root, file), arcname=os.path.join(
+                            nombre_carpeta_comprimida, 'videos', file))
 
         # Comprimir gifs
         if ruta_carpeta_gifs != None:
             if os.path.exists(ruta_carpeta_gifs):
                 for root, dirs, files in os.walk(ruta_carpeta_gifs):
                     for file in files:
-                        zipf.write(os.path.join(root, file), arcname=os.path.join(nombre_carpeta_comprimida, 'gifs', file))
+                        zipf.write(os.path.join(root, file), arcname=os.path.join(
+                            nombre_carpeta_comprimida, 'gifs', file))
 
         # Comprimir archivos enlaces.csv y links_separados.csv
         if os.path.exists('resultados/enlaces.txt'):
-            zipf.write('resultados/enlaces.txt', arcname=os.path.join(nombre_carpeta_comprimida, 'enlaces.txt'))
-            
-    print(f'Archivo {nombre_carpeta_comprimida}.zip creado en la carpeta resultados/')
+            zipf.write('resultados/enlaces.txt',
+                       arcname=os.path.join(nombre_carpeta_comprimida, 'enlaces.txt'))
 
+    print(
+        f'Archivo {nombre_carpeta_comprimida}.zip creado en la carpeta resultados/')
 
 
 def retirar_archivos(nombre_carpeta_1=None, nombre_carpeta_2=None):
@@ -282,4 +294,3 @@ def retirar_archivos(nombre_carpeta_1=None, nombre_carpeta_2=None):
         return print("Carpeta retirada")
     else:
         return print("Carpetas retiradas")
-
