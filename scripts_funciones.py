@@ -5,9 +5,7 @@ import io
 import requests
 from PIL import Image
 import imagehash
-import pandas as pd
 from bs4 import BeautifulSoup
-import numpy as np
 import time
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -135,8 +133,6 @@ def corregir_enlaces_txt(ruta_txt):
             # escribir la línea corregida en el archivo original
             archivo_txt.write(linea + '\n')
 
-            print(f"Línea escrita en archivo: {linea}")
-
     print(f"Archivo {ruta_txt} corregido y sobrescrito.")
 
 
@@ -152,7 +148,7 @@ def eliminar_duplicados(ruta_txt):
     return print("Enlaces duplicados eliminados y archivo sobrescrito")
 
 
-def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta_resultados='resultados', umbral=5, imagen_comparar=None):
+def descargar_imagenes(ruta_txt, carpeta_resultados='resultados', nombre_base='imagen', numero_inicial=1, umbral=5, imagen_comparar=None):
     # Crear carpeta para guardar las imágenes
     carpeta_imagenes = os.path.join('resultados', 'imagenes')
     if not os.path.exists(carpeta_imagenes):
@@ -169,7 +165,7 @@ def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta
     with open(ruta_txt, 'r') as file, open(os.path.join(carpeta_resultados_imagenes, 'links_fallidos.txt'), 'w') as links_file:
         for row in file:
             url_extension = os.path.splitext(row.strip())[1]
-            if url_extension.lower() in ['.png', '.jpg', '']:
+            if url_extension.lower() in ['.png', '.jpg', 'jpeg', '']:
                 response = requests.get(row.strip())
                 try:
                     image = Image.open(io.BytesIO(response.content))
@@ -181,6 +177,13 @@ def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta
                     filename = f"{nombre_base}_{contador:04d}{extension}"
                     filepath = os.path.join(
                         carpeta_resultados_imagenes, filename)
+                    if imagen_comparar is not None:
+                        with Image.open(imagen_comparar) as img:
+                            hash_img = imagehash.average_hash(img)
+                            hash_descarga = imagehash.average_hash(image)
+                            if hash_img - hash_descarga <= umbral:
+                                print(f"La imagen {row.strip()} coincide con {imagen_comparar}, omitiendo descarga")
+                                continue
                     with open(filepath, 'wb') as image_file:
                         image_file.write(response.content)
                     contador += 1
@@ -269,7 +272,7 @@ def comprimir_archivos(nombre_carpeta_comprimida, ruta_carpeta_imagenes='imagene
         # Comprimir archivos enlaces.csv y links_separados.csv
         if os.path.exists('resultados/enlaces.txt'):
             zipf.write('resultados/enlaces.txt',
-                       arcname=os.path.join(nombre_carpeta_comprimida, 'enlaces.txt'))
+                    arcname=os.path.join(nombre_carpeta_comprimida, 'enlaces.txt'))
 
     print(
         f'Archivo {nombre_carpeta_comprimida}.zip creado en la carpeta resultados/')
@@ -294,3 +297,11 @@ def retirar_archivos(nombre_carpeta_1=None, nombre_carpeta_2=None):
         return print("Carpeta retirada")
     else:
         return print("Carpetas retiradas")
+
+# Privatizar módulos 
+__all__ = [
+    obtener_enlaces, obtener_todos_los_enlaces,
+    filtrar_enlaces, eliminar_duplicados, corregir_enlaces_txt,
+    descargar_imagenes, descargar_videos_gifs,
+    comprimir_archivos, retirar_archivos
+]
