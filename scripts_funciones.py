@@ -1,18 +1,19 @@
+import os
 import zipfile
 import shutil
 import io
+import requests
 from PIL import Image
-import csv
-import os
+import imagehash
 import pandas as pd
 from bs4 import BeautifulSoup
-import requests
 import numpy as np
 import time
 from selenium import webdriver
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 def obtener_todos_los_enlaces(url_1, url_2, usuario, password):
@@ -24,33 +25,37 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password):
     options = webdriver.ChromeOptions()
     options.binary_location = brave_path
     options.add_argument('--disable-extensions')
-    options.add_argument('--disable-infobars')
-    options.add_argument('--incognito=false')
+    options.add_argument('--incognito')
     driver = webdriver.Chrome(
-    options=options, executable_path=brave_driver_path)
+        options=options, executable_path=brave_driver_path)
 
-# iniciar sesión
+    # iniciar sesión
     driver.get(url_1)
     username = WebDriverWait(driver, 10).until(
-    EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="username"]')))
+        EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="username"]')))
     password_1 = WebDriverWait(driver, 10).until(
-    EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="password"]')))
+        EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="password"]')))
     username.clear()
     password_1.clear()
     username.send_keys(usuario)
     password_1.send_keys(password)
-    time.sleep(7)
-    #button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.AnimatedForm[type="submit"]')))
-    #button.click()  # Hace clic en el botón
-    #* button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.AnimatedForm__submitButton[type="submit"]')))
-
-    # guardar enlaces en un archivo CSV
-    if not os.path.exists("resultados"):
-        os.makedirs("resultados")
+    time.sleep(8)
 
     # obtener los enlaces guardados del usuario
     driver.get(url_2)
-    time.sleep(5)
+    time.sleep(8)
+    last_height = driver.execute_script("return document.body.scrollHeight")
+    while True:
+        # Hacer scroll hasta el final de la página
+        driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);")
+        # Esperar a que se cargue la página
+        time.sleep(2)
+        # Obtener el nuevo alto de la página
+        new_height = driver.execute_script("return document.body.scrollHeight")
+        if new_height == last_height:
+            break
+        last_height = new_height
     soup = BeautifulSoup(driver.page_source, "html.parser")
     for link in soup.findAll("a"):
         data = link.get("href")
@@ -59,15 +64,17 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password):
                 data = data[:-6]
             enlaces.append(data)
 
-    # guardar enlaces en un archivo CSV
+    # guardar enlaces en un archivo de texto
     if not os.path.exists("resultados"):
         os.makedirs("resultados")
-    np.savetxt("resultados/enlaces.csv", enlaces, delimiter=',', fmt="%s")
+    with open("resultados/enlaces.txt", "w") as f:
+        for enlace in enlaces:
+            f.write(enlace + "\n")
 
     # cerrar el navegador
-    driver.close()
+    driver.quit()
 
-    return print("Archivo CSV de enlaces creado")
+    return print("Archivo de texto de enlaces creado")
 
 
 def obtener_enlaces(url):
@@ -79,71 +86,73 @@ def obtener_enlaces(url):
     for link in soup.findAll("a"):
         data = link.get("href")
         if "https" in data:
-            if data.endswith(',False'):
-                data = data.replace(',False', '') # reemplaza ",False" con una cadena vacía
             enlaces.append(data)
 
-    np.savetxt("resultados/enlaces.csv", enlaces, delimiter=',', fmt="%s")
-    return print("Archivo CSV de enlaces creado")
+    with open("resultados/enlaces.txt", "w") as f:
+        f.write('\n'.join(enlaces))
+
+    return print("Archivo txt de enlaces creado")
 
 
-def filtrar_enlaces(ruta_csv):
-    with open(ruta_csv, 'r') as file:
-        csv_reader = csv.reader(file)
-        rows = [row for row in csv_reader if not (row[0].startswith('https://www.reddit.com/login') or any(link in row[0] for link in ['https://www.redditinc.com/policies/user-agreement',
-            'https://www.redditinc.com/policies/privacy-policy',
-            'https://www.redditinc.com/policies/content-policy',
-            'https://www.redditinc.com/policies/moderator-guidelines',
-            'https://ads.reddit.com?utm_source=d2x_consumer&utm_name=top_nav_cta',
-            'https://www.reddit.com/chat']))]
+def filtrar_enlaces(ruta_txt):
+    with open(ruta_txt, 'r') as file:
+        rows = file.read().splitlines()
 
-    # Eliminar ",False" del final de los enlaces
-    for i in range(len(rows)):
-        rows[i][0] = rows[i][0].rstrip(',False')
+    filtered_rows = [row for row in rows if not (row.startswith('https://www.reddit.com/login') or any(link in row for link in ['https://www.redditinc.com/policies/user-agreement',
+                                                                                                                                'https://www.redditinc.com/policies/privacy-policy',
+                                                                                                                                'https://www.redditinc.com/policies/content-policy',
+                                                                                                                                'https://www.redditinc.com/policies/moderator-guidelines',
+                                                                                                                                'https://ads.reddit.com?utm_source=d2x_consumer&utm_name=top_nav_cta',
+                                                                                                                                'https://www.reddit.com/chat']))]
 
-    with open(ruta_csv, 'w', newline='') as file:
-        csv_writer = csv.writer(file)
-        csv_writer.writerows(rows)
+    with open(ruta_txt, "w") as f:
+        f.write('\n'.join(filtered_rows))
 
-    return print("Enlaces filtrados y guardados en el archivo", ruta_csv)
-
-def eliminar_enlaces_duplicados(ruta_archivo):
-    # Abre el archivo CSV y lee las filas
-    with open(ruta_archivo, newline='', encoding='utf-8') as archivo_csv:
-        lector_csv = csv.reader(archivo_csv)
-        enlaces = [fila[0] for fila in lector_csv]
-
-    # Elimina los duplicados de la lista de enlaces
-    enlaces_unicos = list(set(enlaces))
-
-    # Sobrescribe el archivo original con los enlaces únicos
-    with open(ruta_archivo, 'w', newline='', encoding='utf-8') as archivo_csv:
-        escritor_csv = csv.writer(archivo_csv)
-        for enlace in enlaces_unicos:
-            escritor_csv.writerow([enlace])
-    return print("Quitado los enlaces filtrados")
+    return print("Archivo de enlaces filtrado")
 
 
-def separa_enlaces_videos(ruta_csv):
-    # Crea un objeto DataFrame para leer el archivo CSV
-    df = pd.read_csv(ruta_csv, header=None, names=["enlace"], delimiter=",")
+def corregir_enlaces_txt(ruta_txt):
+    if not os.path.exists(ruta_txt):
+        print(f"No se encontró el archivo en la ruta: {ruta_txt}")
+        return
 
-    # Crea una nueva columna en el DataFrame para marcar los enlaces que comienzan con "https:/example/"
-    df["is_example"] = df["enlace"].str.startswith(("https://www.redgifs.com/", "https://www.reddit.com/gallery/"))
+    with open(ruta_txt, 'r') as archivo_txt:
+        lineas = archivo_txt.readlines()
 
-    # Filtra el DataFrame para seleccionar solo las filas que tienen el valor False en la columna "is_example"
-    df_filtered = df[df["is_example"] == False]
+    with open(ruta_txt, 'w') as archivo_txt:
+        for linea in lineas:
+            # quitar los caracteres de nueva línea y espacios en blanco al final de la línea
+            linea = linea.rstrip()
 
-    # Guarda los enlaces filtrados en un nuevo archivo CSV llamado "links_separados.csv" dentro de la carpeta "resultados"
-    df_example = df[df["is_example"] == True]
-    df_example.to_csv("resultados/links_separados.csv", index=False)
+            # si la última parte de la línea es "False", eliminar esa parte de la cadena
+            if linea.endswith('False'):
+                linea = linea[:-5]
 
-    # Sobrescribe el archivo original con los enlaces filtrados
-    df_filtered.to_csv(ruta_csv, index=False, header=False)
+            # si la última parte de la línea es una coma, eliminarla
+            if linea.endswith(','):
+                linea = linea[:-1]
 
-    return print("Enlaces que no se pueden descargar, separados y guardados en el archivo", ruta_csv)
+            # escribir la línea corregida en el archivo original
+            archivo_txt.write(linea + '\n')
 
-def descargar_imagenes_desde_csv(ruta_csv, nombre_base='imagen', numero_inicial=1, carpeta_resultados='resultados'):
+            print(f"Línea escrita en archivo: {linea}")
+
+    print(f"Archivo {ruta_txt} corregido y sobrescrito.")
+
+
+def eliminar_duplicados(ruta_txt):
+    with open(ruta_txt, 'r') as file:
+        rows = file.read().splitlines()
+
+    filtered_rows = list(set(rows))
+
+    with open(ruta_txt, "w") as f:
+        f.write('\n'.join(filtered_rows))
+
+    return print("Enlaces duplicados eliminados y archivo sobrescrito")
+
+
+def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta_resultados='resultados', umbral=5, imagen_comparar=None):
     # Crear carpeta para guardar las imágenes
     carpeta_imagenes = os.path.join('resultados', 'imagenes')
     if not os.path.exists(carpeta_imagenes):
@@ -157,14 +166,11 @@ def descargar_imagenes_desde_csv(ruta_csv, nombre_base='imagen', numero_inicial=
     ruta_imagenes = os.path.join('resultados', 'imagenes', carpeta_resultados)
 
     contador = numero_inicial
-    with open(ruta_csv, 'r') as file, open(os.path.join(carpeta_resultados_imagenes, 'links_separados.csv'), 'w', newline='') as links_file:
-        csv_reader = csv.reader(file)
-        csv_writer = csv.writer(links_file)
-        next(csv_reader)
-        for row in csv_reader:
-            url_extension = os.path.splitext(row[0])[1]
+    with open(ruta_txt, 'r') as file, open(os.path.join(carpeta_resultados_imagenes, 'links_fallidos.txt'), 'w') as links_file:
+        for row in file:
+            url_extension = os.path.splitext(row.strip())[1]
             if url_extension.lower() in ['.png', '.jpg', '']:
-                response = requests.get(row[0])
+                response = requests.get(row.strip())
                 try:
                     image = Image.open(io.BytesIO(response.content))
                     # si la imagen se puede cargar correctamente, la guardamos
@@ -172,7 +178,7 @@ def descargar_imagenes_desde_csv(ruta_csv, nombre_base='imagen', numero_inicial=
                         extension = '.jpg'
                     else:
                         extension = '.jpg'
-                    filename = f"{nombre_base}_{contador:03d}{extension}"
+                    filename = f"{nombre_base}_{contador:04d}{extension}"
                     filepath = os.path.join(
                         carpeta_resultados_imagenes, filename)
                     with open(filepath, 'wb') as image_file:
@@ -180,13 +186,14 @@ def descargar_imagenes_desde_csv(ruta_csv, nombre_base='imagen', numero_inicial=
                     contador += 1
                 except:
                     # si la imagen no se puede cargar, imprimimos un mensaje de error y continuamos con el siguiente archivo
-                    print(f"Error al descargar la imagen: {row[0]}")
-                    csv_writer.writerow([row[0]])
+                    print(f"Error al descargar la imagen: {row.strip()}")
+                    links_file.write(row.strip() + '\n')
                     continue
-    print(f"Descarga completada de las imágenes del archivo: {ruta_csv}")
+    print(f"Descarga completada de las imágenes del archivo: {ruta_txt}")
+    return ruta_imagenes
 
 
-def descargar_videos_gifs_desde_csv(ruta_csv, nombre_carpeta='carpeta_personalizada', nombre_base='media_', numero_inicial=1):
+def descargar_videos_gifs(ruta_txt, nombre_carpeta='carpeta_personalizada', nombre_base='media_', numero_inicial=1):
     # Crear carpeta para guardar los videos y gifs
     if not os.path.exists('resultados/media/' + nombre_carpeta):
         os.makedirs('resultados/media/' + nombre_carpeta)
@@ -202,11 +209,9 @@ def descargar_videos_gifs_desde_csv(ruta_csv, nombre_carpeta='carpeta_personaliz
 
     contador_videos = numero_inicial
     contador_gifs = numero_inicial
-    with open(ruta_csv, 'r') as file:
-        csv_reader = csv.reader(file)
-        next(csv_reader)
-        for row in csv_reader:
-            url = row[0]
+    with open(ruta_txt, 'r') as file:
+        for line in file:
+            url = line.strip()
             if url.startswith('https://preview.redd.it/') or url.startswith('https://www.redgifs.com/'):
                 response = requests.get(url)
                 content_type = response.headers.get('content-type')
@@ -229,37 +234,48 @@ def descargar_videos_gifs_desde_csv(ruta_csv, nombre_carpeta='carpeta_personaliz
     return ruta_videos, ruta_gifs
 
 
-def comprimir_carpeta(nombre_carpeta_comprimida, ruta_carpeta_imagenes=None, ruta_carpeta_videos=None, ruta_carpeta_gifs=None):
+def comprimir_archivos(nombre_carpeta_comprimida, ruta_carpeta_imagenes='imagenes', ruta_carpeta_videos='videos', ruta_carpeta_gifs='gifs'):
+
     # Crear carpeta para guardar el archivo comprimido
     if not os.path.exists('resultados/' + nombre_carpeta_comprimida):
         os.makedirs('resultados/' + nombre_carpeta_comprimida)
 
-    # Comprimir carpetas
+    # Comprimir archivos
     with zipfile.ZipFile('resultados/' + nombre_carpeta_comprimida + '/' + nombre_carpeta_comprimida + '.zip', mode='w', compression=zipfile.ZIP_DEFLATED) as zipf:
-        if ruta_carpeta_imagenes and os.path.exists(ruta_carpeta_imagenes):
+
+        # Comprimir imágenes
+        if os.path.exists(ruta_carpeta_imagenes):
             for root, dirs, files in os.walk(ruta_carpeta_imagenes):
                 for file in files:
-                    zipf.write(os.path.join(root, file))
+                    zipf.write(os.path.join(root, file), arcname=os.path.join(
+                        nombre_carpeta_comprimida, 'imagenes', file))
 
-        if ruta_carpeta_videos and os.path.exists(ruta_carpeta_videos):
-            for root, dirs, files in os.walk(ruta_carpeta_videos):
-                for file in files:
-                    zipf.write(os.path.join(root, file))
+        # Comprimir videos
+        if ruta_carpeta_videos != None:
+            if os.path.exists(ruta_carpeta_videos):
+                for root, dirs, files in os.walk(ruta_carpeta_videos):
+                    for file in files:
+                        zipf.write(os.path.join(root, file), arcname=os.path.join(
+                            nombre_carpeta_comprimida, 'videos', file))
 
-        if ruta_carpeta_gifs and os.path.exists(ruta_carpeta_gifs):
-            for root, dirs, files in os.walk(ruta_carpeta_gifs):
-                for file in files:
-                    zipf.write(os.path.join(root, file))
+        # Comprimir gifs
+        if ruta_carpeta_gifs != None:
+            if os.path.exists(ruta_carpeta_gifs):
+                for root, dirs, files in os.walk(ruta_carpeta_gifs):
+                    for file in files:
+                        zipf.write(os.path.join(root, file), arcname=os.path.join(
+                            nombre_carpeta_comprimida, 'gifs', file))
 
         # Comprimir archivos enlaces.csv y links_separados.csv
-        if os.path.exists('resultados/enlaces.csv'):
-            zipf.write('resultados/enlaces.csv')
-        if os.path.exists('resultados/links_separados.csv'):
-            zipf.write('resultados/links_separados.csv')
+        if os.path.exists('resultados/enlaces.txt'):
+            zipf.write('resultados/enlaces.txt',
+                       arcname=os.path.join(nombre_carpeta_comprimida, 'enlaces.txt'))
 
-    print('Carpetas comprimidas exitosamente')
+    print(
+        f'Archivo {nombre_carpeta_comprimida}.zip creado en la carpeta resultados/')
 
-def retirar_archivos (nombre_carpeta_1 = None, nombre_carpeta_2 = None):
+
+def retirar_archivos(nombre_carpeta_1=None, nombre_carpeta_2=None):
     contador = 0
     if nombre_carpeta_1 != None:
         shutil.rmtree("resultados/imagenes/" + nombre_carpeta_1)
@@ -268,41 +284,13 @@ def retirar_archivos (nombre_carpeta_1 = None, nombre_carpeta_2 = None):
     if nombre_carpeta_2 != None:
         shutil.rmtree("resultados/media/" + nombre_carpeta_2)
         contador += 1
-    
-    ruta_enlaces = os.path.join("resultados", "enlaces.csv")
-    ruta_links = os.path.join("resultados", "links_separados.csv")
+
+    ruta_enlaces = os.path.join("resultados", "enlaces.txt")
 
     if os.path.exists(ruta_enlaces):
         os.remove(ruta_enlaces)
-
-    if os.path.exists(ruta_links):
-        os.remove(ruta_links)
 
     if contador != 2:
         return print("Carpeta retirada")
     else:
         return print("Carpetas retiradas")
-    
-
-def filtrar (ruta_csv):
-    enlaces_filtrados = []
-    with open(ruta_csv, 'r') as file:
-        csv_reader = csv.reader(file)
-        for row in csv_reader:
-            enlace = row[0].strip()
-            if not enlace.startswith('https://www.reddit.com/login') and not any(link in enlace for link in ['https://www.redditinc.com/policies/user-agreement',
-                'https://www.redditinc.com/policies/privacy-policy',
-                'https://www.redditinc.com/policies/content-policy',
-                'https://www.redditinc.com/policies/moderator-guidelines',
-                'https://ads.reddit.com?utm_source=d2x_consumer&utm_name=top_nav_cta',
-                'https://www.reddit.com/chat',
-                'https://i.imgur.com/9NW0AiX.png']):
-                if enlace.endswith(",False"):
-                    enlace = enlace[:-6]
-                enlaces_filtrados.append([enlace])
-
-    with open(ruta_csv, 'w', newline='') as file:
-        csv_writer = csv.writer(file)
-        csv_writer.writerows(enlaces_filtrados)
-
-    return print("Enlaces filtrados y guardados en el archivo", ruta_csv)
