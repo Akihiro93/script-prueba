@@ -135,8 +135,6 @@ def corregir_enlaces_txt(ruta_txt):
             # escribir la línea corregida en el archivo original
             archivo_txt.write(linea + '\n')
 
-            print(f"Línea escrita en archivo: {linea}")
-
     print(f"Archivo {ruta_txt} corregido y sobrescrito.")
 
 
@@ -152,7 +150,7 @@ def eliminar_duplicados(ruta_txt):
     return print("Enlaces duplicados eliminados y archivo sobrescrito")
 
 
-def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta_resultados='resultados', umbral=5, imagen_comparar=None):
+def descargar_imagenes(ruta_txt, carpeta_resultados='resultados', nombre_base='imagen', numero_inicial=1, umbral=5, imagen_comparar=None):
     # Crear carpeta para guardar las imágenes
     carpeta_imagenes = os.path.join('resultados', 'imagenes')
     if not os.path.exists(carpeta_imagenes):
@@ -169,7 +167,7 @@ def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta
     with open(ruta_txt, 'r') as file, open(os.path.join(carpeta_resultados_imagenes, 'links_fallidos.txt'), 'w') as links_file:
         for row in file:
             url_extension = os.path.splitext(row.strip())[1]
-            if url_extension.lower() in ['.png', '.jpg', '']:
+            if url_extension.lower() in ['.png', '.jpg', 'jpeg', '']:
                 response = requests.get(row.strip())
                 try:
                     image = Image.open(io.BytesIO(response.content))
@@ -186,7 +184,7 @@ def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta
                             hash_img = imagehash.average_hash(img)
                             hash_descarga = imagehash.average_hash(image)
                             if hash_img - hash_descarga <= umbral:
-                                print(f"La imagen {row.strip()} ya existe en {imagen_comparar}, omitiendo descarga")
+                                print(f"La imagen {row.strip()} coincide con {imagen_comparar}, omitiendo descarga")
                                 continue
                     with open(filepath, 'wb') as image_file:
                         image_file.write(response.content)
