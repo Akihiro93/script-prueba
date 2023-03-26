@@ -5,9 +5,7 @@ import io
 import requests
 from PIL import Image
 import imagehash
-import pandas as pd
 from bs4 import BeautifulSoup
-import numpy as np
 import time
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -299,3 +297,11 @@ def retirar_archivos(nombre_carpeta_1=None, nombre_carpeta_2=None):
         return print("Carpeta retirada")
     else:
         return print("Carpetas retiradas")
+
+# Privatizar módulos 
+__all__ = [
+    obtener_enlaces, obtener_todos_los_enlaces,
+    filtrar_enlaces, eliminar_duplicados, corregir_enlaces_txt,
+    descargar_imagenes, descargar_videos_gifs,
+    comprimir_archivos, retirar_archivos
+]

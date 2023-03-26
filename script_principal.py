@@ -1,10 +1,9 @@
+# TODO: Agregar las funciones para las configuraciones 
 import scripts_funciones
 from Funciones_interaccion import obtener_url_valida, verificar_archivo, obtener_opcion_valida, obtener_entero_positivo
 
 print("El enlace de la pagina, ")
 para_buscar = obtener_url_valida()
-
-ruta_txt = "resultados/enlaces.txt"
 
 print("¿Quieres usar la función avanzada para login en redes sociales y recorrer todas la pagina? [Y/N]:")
 opcional_1 = obtener_opcion_valida()
@@ -17,6 +16,8 @@ opcional_3 = obtener_opcion_valida()
 
 print("¿Quieres comprimir los archivos? [Y/N]:")
 opcional_4 = obtener_opcion_valida()
+
+ruta_txt = "resultados/enlaces.txt"
 incumplimientos = 0
 
 
@@ -72,7 +73,7 @@ if incumplimientos != 2 and opcional_4:
     nombre_zip = input("Nombre para el archivo zip: ")
     scripts_funciones.comprimir_archivos(
         nombre_zip, ruta_imagenes, ruta_videos_1, ruta_gif_1)
-    print("¿Quiere que se eliminen los archivos fuente y sul carpetas[Y/N]:\n")
+    print("¿Quiere que se eliminen los archivos fuente y sul carpetas[Y/N]:")
     opcional_4_1 = obtener_opcion_valida()
     if opcional_4_1:
         scripts_funciones.retirar_archivos(nombre_carpeta_1, nombre_carpeta_2)
