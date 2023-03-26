@@ -1,7 +1,7 @@
 import scripts_funciones
+
+
 para_buscar = input("El enlace de la pagina: ")
-
-
 opcional_1_1 = ''
 opcional_1 = ''
 opcional_2 = ''
@@ -9,7 +9,8 @@ opcional_3 = ''
 opcional_1_2_1 = 0
 
 while opcional_1_1 not in ['Y', 'N']:
-    opcional_1_1 = input("¿Quieres que se se use la función avanzada para login en redes sociales? [Y/N]\n")
+    opcional_1_1 = input(
+        "¿Quieres que se se use la función avanzada para login en redes sociales? [Y/N]\n")
     if opcional_1_1.lower() == 'exit':
         exit()
     elif opcional_1_1 not in ['Y', 'N']:
@@ -20,7 +21,8 @@ if opcional_1_1 == "Y":
     url_2 = "https://www.reddit.com/user/Akihiro9/saved/"
     usuario_1 = "Akihiro9"
     contraseña_1 = "TLq9JHzg*q%n1JpR"
-    scripts_funciones.obtener_todos_los_enlaces(url_1, url_2, usuario_1, contraseña_1)
+    scripts_funciones.obtener_todos_los_enlaces(
+        url_1, url_2, usuario_1, contraseña_1)
 else:
     scripts_funciones.obtener_enlaces(para_buscar)
 
@@ -54,7 +56,7 @@ if opcional_1 == "Y":
                 print("Opción inválida. Por favor ingresa 'Y' o 'N'")
         numero_de_comienzo = 1
     ruta_imagenes = scripts_funciones.descargar_imagenes(
-        "resultados/enlaces.txt", nombre, numero_de_comienzo, nombre_carpeta_1)
+        "resultados/enlaces.txt", nombre, numero_de_comienzo, nombre_carpeta_1, 5, "image_comparar/ejemplo.jpg")
 else:
     ruta_imagenes = None
     nombre_carpeta_1 = None
@@ -106,11 +108,13 @@ if opcional_1_2_1 != 2:
     if opcional_3 == "Y":
         opcional_1_3 = ""
         nombre_zip = input("Nombre para el archivo zip: ")
-        scripts_funciones.comprimir_archivos(nombre_zip, ruta_imagenes, ruta_videos_1, ruta_gif_1)
+        scripts_funciones.comprimir_archivos(
+            nombre_zip, ruta_imagenes, ruta_videos_1, ruta_gif_1)
         while opcional_1_3 not in ['Y', 'N']:
             opcional_1_3 = input("Desea eliminar los archivos [Y/N]\n")
             if opcional_1_3 == "Y":
-                scripts_funciones.retirar_archivos (nombre_carpeta_1, nombre_carpeta_2)
+                scripts_funciones.retirar_archivos(
+                    nombre_carpeta_1, nombre_carpeta_2)
             elif opcional_1_3 not in ['Y', 'N']:
                 print("Opción inválida. Por favor ingresa 'Y' o 'N'")
         print("Terminado la tarea")

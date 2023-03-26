@@ -181,6 +181,13 @@ def descargar_imagenes(ruta_txt, nombre_base='imagen', numero_inicial=1, carpeta
                     filename = f"{nombre_base}_{contador:04d}{extension}"
                     filepath = os.path.join(
                         carpeta_resultados_imagenes, filename)
+                    if imagen_comparar is not None:
+                        with Image.open(imagen_comparar) as img:
+                            hash_img = imagehash.average_hash(img)
+                            hash_descarga = imagehash.average_hash(image)
+                            if hash_img - hash_descarga <= umbral:
+                                print(f"La imagen {row.strip()} ya existe en {imagen_comparar}, omitiendo descarga")
+                                continue
                     with open(filepath, 'wb') as image_file:
                         image_file.write(response.content)
                     contador += 1
@@ -269,7 +276,7 @@ def comprimir_archivos(nombre_carpeta_comprimida, ruta_carpeta_imagenes='imagene
         # Comprimir archivos enlaces.csv y links_separados.csv
         if os.path.exists('resultados/enlaces.txt'):
             zipf.write('resultados/enlaces.txt',
-                       arcname=os.path.join(nombre_carpeta_comprimida, 'enlaces.txt'))
+                    arcname=os.path.join(nombre_carpeta_comprimida, 'enlaces.txt'))
 
     print(
         f'Archivo {nombre_carpeta_comprimida}.zip creado en la carpeta resultados/')
