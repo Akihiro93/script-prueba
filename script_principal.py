@@ -1,35 +1,22 @@
 # TODO: Agregar las funciones para las configuraciones 
 import scripts_funciones
-from Funciones_interaccion import obtener_url_valida, verificar_archivo, obtener_opcion_valida, obtener_entero_positivo
+from Funciones_interaccion import obtener_url_valida, verificar_archivo, obtener_opcion_valida, obtener_entero_positivo, obtener_parametros
 
-print("El enlace de la pagina, ")
-para_buscar = obtener_url_valida()
-
-print("¿Quieres usar la función avanzada para login en redes sociales y recorrer todas la pagina? [Y/N]:")
-opcional_1 = obtener_opcion_valida()
-
-print("¿Quieres descargar las imagenes? [Y/N]:")
-opcional_2 = obtener_opcion_valida()
-
-print("¿Quieres descargar los videos? [Y/N]:")
-opcional_3 = obtener_opcion_valida()
-
-print("¿Quieres comprimir los archivos? [Y/N]:")
-opcional_4 = obtener_opcion_valida()
+para_buscar, opcional_1, opcional_2, opcional_3, opcional_4 = obtener_parametros()
 
 ruta_txt = "resultados/enlaces.txt"
-incumplimientos = 0
 
 
 if opcional_1:
     url_1, url_2, usuario_1, contraseña_1 = (
         "https://www.reddit.com/login/",
-        "https://www.reddit.com/user/Akihiro9/saved/",
+        para_buscar,
         "Akihiro9",
         "TLq9JHzg*q%n1JpR"
     )
     scripts_funciones.obtener_todos_los_enlaces(
-        url_1, url_2, usuario_1, contraseña_1)
+        url_1, url_2, usuario_1, contraseña_1
+    )
 else:
     scripts_funciones.obtener_enlaces(para_buscar)
 
@@ -55,7 +42,7 @@ if opcional_2:
 else:
     ruta_imagenes = None
     nombre_carpeta_1 = None
-    incumplimientos += 1
+
 
 if opcional_3:
     nombre_carpeta_2 = input("Nombre para carpeta de los medios: ")
@@ -67,9 +54,8 @@ else:
     ruta_videos_1 = None
     ruta_gif_1 = None
     nombre_carpeta_2 = None
-    incumplimientos += 1
 
-if incumplimientos != 2 and opcional_4:
+if opcional_4:
     nombre_zip = input("Nombre para el archivo zip: ")
     scripts_funciones.comprimir_archivos(
         nombre_zip, ruta_imagenes, ruta_videos_1, ruta_gif_1)
