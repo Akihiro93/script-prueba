@@ -77,26 +77,67 @@ def obtener_parametros():
     return para_buscar, opcional_1, opcional_2, opcional_3, opcional_4
 
 
-def agregar_configuracion(
-        nombre, url_busqueda, descarga_imagenes, nombre_carpeta_imagenes, numero_de_comienzo_1, obviar_imagen, ruta_obviar, descarga_videos, nombre_carpeta_medios, numero_de_comienzo_2, comprimir_archivos, nombre_de_zip, eliminar_archivos_fuente
-        ):
+def agregar_configuraciones(configuraciones):
+    for configuracion in configuraciones:
+        with open(f"{configuracion['nombre']}.json", "w") as f:
+            json.dump(configuracion, f)
 
-    configuracion = {
-        "nombre": nombre,
-        "url_busqueda": url_busqueda,
-        "descarga_imagenes": descarga_imagenes,
-        "nombre_carpeta_imagenes": nombre_carpeta_imagenes,
-        "numero_de_comienzo_imagenes": numero_de_comienzo_1,
-        "obviar_imagen": obviar_imagen,
-        "ruta_de_imagen": ruta_obviar,
-        "descarga_videos": descarga_videos,
-        "nombre_carpeta_medios": nombre_carpeta_medios,
-        "numero_de_comienzo_imagenes": numero_de_comienzo_2,
-        "comprimir_archivos": comprimir_archivos,
-        "nombre_zip": nombre_de_zip,
-        "eliminar_archivos_fuente": eliminar_archivos_fuente
-    }
-    with open(f"{nombre}.json", "w") as f:
-        json.dump(configuracion, f)
+    print("Configuraciones agregadas exitosamente!")
 
+
+def crear_configuracion(lista):
+    claves = [
+        "nombre", "url_busqueda",
+        "descarga_imagenes", "nombre_carpeta_imagenes", "numero_de_comienzo_imagenes", "obviar_imagen", "ruta_de_imagen",
+        "descarga_videos", "nombre_carpeta_medios", "numero_de_comienzo_videos",
+        "comprimir_archivos", "nombre_zip", "eliminar_archivos_fuente"
+    ]
+    
+    # Verificar si existe la carpeta "configuraciones"
+    if not os.path.exists("configuraciones"):
+        os.makedirs("configuraciones")
+    
+    # Verificar si existe el archivo "configuraciones.json" dentro de la carpeta "configuraciones"
+    if not os.path.isfile("configuraciones/configuraciones.json"):
+        with open("configuraciones/configuraciones.json", "w") as f:
+            json.dump({}, f)
+    
+    # Leer las configuraciones existentes del archivo "configuraciones.json"
+    with open("configuraciones/configuraciones.json", "r") as f:
+        configuraciones = json.load(f)
+    
+    # Crear una nueva configuración con la lista de valores
+    configuracion = {}
+    for i, valor in enumerate(lista):
+        clave = claves[i]
+        configuracion[clave] = valor
+    
+    # Agregar la nueva configuración a la lista de configuraciones
+    configuraciones[configuracion["nombre"]] = configuracion
+    
+    # Guardar las configuraciones actualizadas en el archivo "configuraciones.json"
+    with open("configuraciones/configuraciones.json", "w") as f:
+        json.dump(configuraciones, f)
+    
     print("Configuración agregada exitosamente!")
+
+
+def leer_configuracion(nombre):
+    try:
+        with open(f"{nombre}.json", "r") as f:
+            configuracion = json.load(f)
+            return (configuracion["url_busqueda"],
+                    configuracion["descarga_imagenes"],
+                    configuracion["nombre_carpeta_imagenes"],
+                    configuracion["numero_de_comienzo_imagenes"],
+                    configuracion["obviar_imagen"],
+                    configuracion["ruta_de_imagen"],
+                    configuracion["descarga_videos"],
+                    configuracion["nombre_carpeta_medios"],
+                    configuracion["numero_de_comienzo_videos"],
+                    configuracion["comprimir_archivos"],
+                    configuracion["nombre_zip"],
+                    configuracion["eliminar_archivos_fuente"])
+    except FileNotFoundError:
+        print(f"El archivo {nombre}.json no existe.")
+        return False

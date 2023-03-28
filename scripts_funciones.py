@@ -96,12 +96,10 @@ def filtrar_enlaces(ruta_txt):
     with open(ruta_txt, 'r') as file:
         rows = file.read().splitlines()
 
-    filtered_rows = [row for row in rows if not (row.startswith('https://www.reddit.com/login') or any(link in row for link in ['https://www.redditinc.com/policies/user-agreement',
-                                                                                                                                'https://www.redditinc.com/policies/privacy-policy',
-                                                                                                                                'https://www.redditinc.com/policies/content-policy',
-                                                                                                                                'https://www.redditinc.com/policies/moderator-guidelines',
-                                                                                                                                'https://ads.reddit.com?utm_source=d2x_consumer&utm_name=top_nav_cta',
-                                                                                                                                'https://www.reddit.com/chat']))]
+    filtered_rows = [row for row in rows if not (row.startswith('https://www.reddit.com/login') or any(link in row for link in ['https://www.redditinc.com/policies/user-agreement', 'https://www.redditinc.com/policies/privacy-policy',
+    'https://www.redditinc.com/policies/content-policy', 'https://www.redditinc.com/policies/moderator-guidelines',
+    'https://ads.reddit.com?utm_source=d2x_consumer&utm_name=top_nav_cta', 'https://www.reddit.com/chat'
+    ]))]
 
     with open(ruta_txt, "w") as f:
         f.write('\n'.join(filtered_rows))
