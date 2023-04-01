@@ -80,7 +80,7 @@ def obtener_parametros():
 def agregar_configuraciones(configuraciones):
     for configuracion in configuraciones:
         with open(f"{configuracion['nombre']}.json", "w") as f:
-            json.dump(configuracion, f)
+            json.dump(configuracion, f, indent=4)
 
     print("Configuraciones agregadas exitosamente!")
 
@@ -128,40 +128,7 @@ def crear_configuracion(lista):
     print("Configuración agregada exitosamente!")
 
 
-def leer_configuracion(nombre_configuracion):
-    try:
-        with open("configuraciones/configuraciones.json", "r") as f:
-            configuraciones = json.load(f)
-            configuracion = configuraciones.get(nombre_configuracion)
-            if configuracion:
-                print(f"Configuración seleccionada: {nombre_configuracion}")
-                print("Valores:")
-                for clave, valor in configuracion.items():
-                    print(f"{clave}: {valor}")
-                return (
-                    configuracion["url_inicio_de_sesion"],
-                    configuracion["url_busqueda"],
-                    configuracion["descarga_imagenes"],
-                    configuracion["nombre_carpeta_imagenes"],
-                    configuracion["numero_de_comienzo_imagenes"],
-                    configuracion["obviar_imagen"],
-                    configuracion["ruta_de_imagen"],
-                    configuracion["descarga_videos"],
-                    configuracion["nombre_carpeta_medios"],
-                    configuracion["numero_de_comienzo_videos"],
-                    configuracion["comprimir_archivos"],
-                    configuracion["nombre_zip"],
-                    configuracion["eliminar_archivos_fuente"],
-                    configuracion["usar_funcion_avanzada"]
-                )
-            else:
-                print(f"La configuración {nombre_configuracion} no existe.")
-                return False
-    except FileNotFoundError:
-        print("El archivo configuraciones.json no existe.")
-        return False
-
-def leer_configuracion_2():
+def leer_configuracion():
     try:
         with open("configuraciones/configuraciones.json", "r") as f:
             configuraciones = json.load(f)

@@ -164,7 +164,13 @@ def descargar_imagenes(ruta_txt, carpeta_resultados='resultados', nombre_base='i
         for row in file:
             url_extension = os.path.splitext(row.strip())[1]
             if url_extension.lower() in ['.png', '.jpg', 'jpeg', '']:
-                response = requests.get(row.strip())
+                try:
+                    response = requests.get(row.strip())
+                except requests.exceptions.MissingSchema as e:
+                    # si la URL no tiene el formato correcto, imprimimos un mensaje de error y escribimos el enlace fallido en el archivo
+                    print(f"Error en la URL: {row.strip()}")
+                    links_file.write(row.strip() + '\n')
+                    continue
                 try:
                     image = Image.open(io.BytesIO(response.content))
                     # si la imagen se puede cargar correctamente, la guardamos
