@@ -1,97 +1,107 @@
+# TODO: Agregar las funciones para las configuraciones 
 import scripts_funciones
+import funciones_interaccion
 
 
-para_buscar = input("El enlace de la pagina: ")
-scripts_funciones.obtener_enlaces(para_buscar)
-scripts_funciones.filtrar_enlaces("resultados/enlaces.csv")
-opcional_1 = ''
-opcional_2 = ''
-opcional_3 = ''
-
-
-while opcional_1 not in ['Y', 'N']:
-    opcional_1 = input("¿Quieres que se descarguen las imagenes? [Y/N]\n")
-    if opcional_1.lower() == 'exit':
-        exit()
-    elif opcional_1 not in ['Y', 'N']:
-        print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-
-while opcional_2 not in ['Y', 'N']:
-    opcional_2 = input(
-        "¿Quieres que se descarguen los videos y gifts? [Y/N]\n")
-    if opcional_2.lower() == 'exit':
-        exit()
-    elif opcional_2 not in ['Y', 'N']:
-        print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-
-while opcional_3 not in ['Y', 'N']:
-    opcional_3 = input(
-        "¿Quieres que se compriman las carpetas [Y/N]\n")
-    if opcional_3.lower() == 'exit':
-        exit()
-    elif opcional_3 not in ['Y', 'N']:
-        print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-
-
-if opcional_1 == "Y":
-    nombre_carpeta_1 = input("Nombre para carpeta de las imagenes: ")
-    nombre = input("Nombre para los archivos: ")
-    try:
-        numero_de_comienzo = int(input("numero de comienzo: "))
-    except:
-        opcional_1_2 = ''
-        while opcional_1_2 not in ['Y', 'N']:
-            opcional_1_2 = input(
-                "ERROR: el valor se asignara como 1, continuar [Y/N]\n")
-            if opcional_1_2 == "Y":
-                numero_de_comienzo = 1
-            elif opcional_1_2 == "N":
-                exit()
-            elif opcional_1_2 not in ['Y', 'N']:
-                print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-        numero_de_comienzo = 1
-    ruta_imagenes = scripts_funciones.descargar_imagenes_desde_csv(
-        "resultados/enlaces.csv", nombre, numero_de_comienzo, nombre_carpeta_1)
+print("Usar alguna configuracion guardada: [Y/N]")
+opcional_0 = funciones_interaccion.obtener_opcion_valida()
+if opcional_0:
+    nombre_de_configuracion, para_buscar, opcional_1, url_1, opcional_2, nombre_carpeta_1, numero_de_comienzo, verificar_imagen, opcional_3, nombre_carpeta_2, numero_de_comienzo_2, opcional_4, nombre_zip, opcional_4_1 = funciones_interaccion.leer_configuracion()
 else:
-    ruta_imagenes = None
+    para_buscar, opcional_1, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
+    lista = []
+
+ruta_txt = "resultados/enlaces.txt"
 
 
-if opcional_2 == "Y":
-    nombre_carpeta_2 = input("Nombre para carpeta de los medios: ")
-    nombre = input("Nombre para los archivos: ")
-    try:
-        numero_de_comienzo = int(input("numero de comienzo: "))
-    except:
-        opcional_1_2 = ''
-        while opcional_1_2 not in ['Y', 'N']:
-            opcional_1_2 = input(
-                "ERROR: el valor se asignara como 1, continuar [Y/N]\n")
-            if opcional_1_2 == "Y":
-                numero_de_comienzo = 1
-            elif opcional_1_2 == "N":
-                exit()
-            elif opcional_1_2 not in ['Y', 'N']:
-                print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-    ruta_videos_1, ruta_gif_1 = scripts_funciones.descargar_videos_gifs_desde_csv(
-        "resultados/enlaces.csv", nombre_carpeta_2, nombre, numero_de_comienzo)
-    print("Descarga completada de los videos y gifs del archivo: resultados/enlaces.csv")
+if opcional_1:
+    url_1, usuario_1, contraseña_1 = (
+        "https://www.reddit.com/login/",
+        "Akihiro9",
+        "TLq9JHzg*q%n1JpR"
+    )
+    scripts_funciones.obtener_todos_los_enlaces(
+        url_1, para_buscar, usuario_1, contraseña_1
+    )
+    lista.append(para_buscar)
+    lista.append(opcional_1)
+    lista.append(url_1)
 else:
-    ruta_videos_1 = None
-    ruta_gif_1 = None
+    scripts_funciones.obtener_enlaces(para_buscar)
+    lista.append(para_buscar)
+    lista.append(opcional_1)
+    lista.append(None)
 
-if opcional_3 == "Y":
-    opcional_1_2 = ""
+scripts_funciones.filtrar_enlaces(ruta_txt)
+scripts_funciones.corregir_enlaces_txt(ruta_txt)
+scripts_funciones.eliminar_duplicados(ruta_txt)
+
+
+if opcional_2:
+    if not opcional_0:
+        nombre_carpeta_1 = input("Nombre para carpeta de las imagenes: ")
+        nombre_archivos = input("Nombre para los archivos: ")
+        numero_de_comienzo = funciones_interaccion.obtener_entero_positivo()
+        print("quiere que se obvie alguna imagen [Y/N]")
+        opcional_2_1 = funciones_interaccion.obtener_opcion_valida()
+        if opcional_2_1:
+            print("Ruta del archivo debe ser png o jpg ")
+            verificar_imagen = funciones_interaccion.verificar_archivo()
+        else:
+            verificar_imagen = None
+    ruta_imagenes = scripts_funciones.descargar_imagenes(
+        ruta_txt, nombre_carpeta_1, nombre_archivos, numero_de_comienzo, imagen_comparar=verificar_imagen
+    )
+    lista.append(opcional_2)
+    lista.append(nombre_carpeta_1)
+    lista.append(numero_de_comienzo)
+    lista.append(verificar_imagen)
+    lista.append(ruta_imagenes)
+else:
+    lista.append(opcional_2)
+    lista.append(None)
+    lista.append(None)
+    lista.append(None)
+    lista.append(None)
+
+
+if opcional_3:
+    if not opcional_0:
+        nombre_carpeta_2 = input("Nombre para carpeta de los medios: ")
+        nombre_archivos_2 = input("Nombre para los archivos: ")
+        numero_de_comienzo_2 = funciones_interaccion.obtener_entero_positivo()
+    ruta_videos_1, ruta_gif_1 = scripts_funciones.descargar_videos_gifs(
+        ruta_txt, nombre_carpeta_2, nombre_archivos_2, numero_de_comienzo_2)
+    lista.append(opcional_3)
+    lista.append(nombre_carpeta_2)
+    lista.append(numero_de_comienzo_2)
+else:
+    lista.append(opcional_3)
+    lista.append(None)
+    lista.append(None)
+
+
+if opcional_4:
     nombre_zip = input("Nombre para el archivo zip: ")
-    while opcional_1_2 not in ['Y', 'N']:
-        opcional_1_2 = input("Desea eliminar las carpetas [Y/N]\n")
-        if opcional_1_2 == "Y":
-            import shutil
-            shutil.rmtree("resultados/imagenes/" + nombre_carpeta_1)
-            shutil.rmtree("resultados/media/" + nombre_carpeta_2)
-        elif opcional_1_2 not in ['Y', 'N']:
-            print("Opción inválida. Por favor ingresa 'Y' o 'N'")
-    scripts_funciones.comprimir_carpeta(
+    scripts_funciones.comprimir_archivos(
         nombre_zip, ruta_imagenes, ruta_videos_1, ruta_gif_1)
-    print("Terminado la tarea")
+    print("¿Quiere que se eliminen los archivos fuente y sul carpetas[Y/N]:")
+    opcional_4_1 = funciones_interaccion.obtener_opcion_valida()
+    if opcional_4_1:
+        scripts_funciones.retirar_archivos(nombre_carpeta_1, nombre_carpeta_2)
+    lista.append(opcional_4)
+    lista.append(nombre_zip)
+    lista.append(opcional_4_1)
 else:
-    print("Terminado la tarea")
+    lista.append(opcional_4)
+    lista.append(None)
+    lista.append(None)
+
+
+if not opcional_0:
+    print("Guardar los parametros (configuracion): [Y/N]")
+    opcional_5 = funciones_interaccion.obtener_opcion_valida()
+    if opcional_5:
+        nombre_de_configuracion = input("El nombre de la configuracion: ")
+        lista.insert(0, nombre_de_configuracion)
+        funciones_interaccion.crear_configuracion(lista)
