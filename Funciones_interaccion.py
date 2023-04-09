@@ -26,7 +26,7 @@ def obtener_entero_positivo():
             continue
 
 
-def verificar_archivo ():
+def verificar_archivo():
     while True:
         ruta = input("Introduce la ruta del archivo: ")
         if os.path.exists(ruta):
@@ -34,6 +34,7 @@ def verificar_archivo ():
             if extension == ".png" or extension == ".jpg":
                 return ruta
         print("Ruta de archivo inválida. Introduce una ruta válida.")
+
 
 def obtener_opcion_valida(opcion_exit=True):
     opciones_validas = ["Y", "N"]
@@ -47,7 +48,8 @@ def obtener_opcion_valida(opcion_exit=True):
         elif opcion == "exit" and opcion_exit:
             return False
         else:
-            print("Opción inválida. Por favor ingresa una de las opciones siguientes: Y, N")
+            print(
+                "Opción inválida. Por favor ingresa una de las opciones siguientes: Y, N")
 
 
 def obtener_parametros():
@@ -55,8 +57,17 @@ def obtener_parametros():
     print("Introduce el enlace de la página")
     para_buscar = obtener_url_valida()
 
-    print("¿Quieres usar la función avanzada para login en redes sociales y recorrer toda la página? [Y/N]:")
+    print(
+        "¿Quieres usar la función avanzada para login en redes sociales y recorrer toda la página? [Y/N]:")
     opcional_1 = obtener_opcion_valida()
+    if opcional_1:
+        url_login = obtener_url_valida()
+        usuario = input("Su usuario: ")
+        password = input("La contraseña: ")
+    else:
+        url_login = None
+        usuario = None
+        password = None
 
     print("¿Quieres descargar las imágenes? [Y/N]:")
     opcional_2 = obtener_opcion_valida()
@@ -74,7 +85,7 @@ def obtener_parametros():
     else:
         opcional_4 = False
 
-    return para_buscar, opcional_1, opcional_2, opcional_3, opcional_4
+    return para_buscar, opcional_1, url_login, usuario, password, opcional_2, opcional_3, opcional_4
 
 
 def agregar_configuraciones(configuraciones):
@@ -87,21 +98,21 @@ def agregar_configuraciones(configuraciones):
 
 def crear_configuracion(lista):
     claves = [
-    "nombre", "url_busqueda", "usar_funcion_avanzada", "url_inicio_de_sesion",
-    "descarga_imagenes", "nombre_carpeta_imagenes", "numero_de_comienzo_imagenes", "obviar_imagen", "ruta_de_imagen",
-    "descarga_videos", "nombre_carpeta_medios", "numero_de_comienzo_videos",
-    "comprimir_archivos", "nombre_zip", "eliminar_archivos_fuente" # Agregar esta clave
+        "nombre", "url_busqueda", "usar_funcion_avanzada", "usuario", "password", "url_inicio_de_sesion",
+        "descarga_imagenes", "nombre_carpeta_imagenes", "nombre_imagenes", "numero_de_comienzo_imagenes", "obviar_imagen", "ruta_de_imagen",
+        "descarga_videos", "nombre_carpeta_medios", "nombre_medios", "numero_de_comienzo_videos", "ruta_videos", "ruta_gifs",
+        "comprimir_archivos", "nombre_zip", "eliminar_archivos_fuente"
     ]
-    
+
     # Verificar si existe la carpeta "configuraciones"
     if not os.path.exists("configuraciones"):
         os.makedirs("configuraciones")
-    
+
     # Verificar si existe el archivo "configuraciones.json" dentro de la carpeta "configuraciones"
     if not os.path.isfile("configuraciones/configuraciones.json"):
         with open("configuraciones/configuraciones.json", "w") as f:
             json.dump({}, f)
-    
+
     # Leer las configuraciones existentes del archivo "configuraciones.json"
     try:
         with open("configuraciones/configuraciones.json", "r") as f:
@@ -111,75 +122,109 @@ def crear_configuracion(lista):
                 configuraciones = json.load(f)
     except json.decoder.JSONDecodeError:
         configuraciones = {}
-    
+
     # Crear una nueva configuración con la lista de valores
     configuracion = {}
     for i, valor in enumerate(lista):
         clave = claves[i]
         configuracion[clave] = valor
-    
+
     # Agregar la nueva configuración a la lista de configuraciones
     configuraciones[configuracion["nombre"]] = configuracion
-    
+
     # Guardar las configuraciones actualizadas en el archivo "configuraciones.json"
     with open("configuraciones/configuraciones.json", "w") as f:
         json.dump(configuraciones, f)
-    
+
     print("Configuración agregada exitosamente!")
 
 
 def leer_configuracion():
     try:
-        with open("configuraciones/configuraciones.json", "r") as f:
-            configuraciones = json.load(f)
-            
+        try:
+            with open("configuraciones/configuraciones.json", "r") as f:
+                configuraciones = json.load(f)
+        except json.JSONDecodeError:
+            print("ERROR: No tiene alguna configuracion guardada")
+            false = [False for _ in range(20)]
+            return false
+
             # Imprimir el nombre de todas las configuraciones con un número de índice
             print("Configuraciones:")
             for i, nombre in enumerate(configuraciones):
                 print(f"{i+1}. {nombre}")
-            
+
             # Permitir al usuario seleccionar una configuración
-            seleccion = int(input("Selecciona una configuración: ")) - 1
-            nombre_configuracion = list(configuraciones.keys())[seleccion]
-            configuracion = configuraciones[nombre_configuracion]
-            
+            while True:
+                try:
+                    seleccion = int(
+                        input("Selecciona una configuración: ")) - 1
+                    nombre_configuracion = list(
+                        configuraciones.keys())[seleccion]
+                    configuracion = configuraciones[nombre_configuracion]
+                except:
+                    print("error introduce bien el numero")
+                else:
+                    break
+
             # Imprimir los valores de la configuración seleccionada
             print("Valores:")
             print(f"Nombre: {nombre_configuracion}")
-            print(f"URL de inicio de sesion:{configuracion['url_inicio_de_sesion']}")
             print(f"URL de búsqueda: {configuracion['url_busqueda']}")
+            print(
+                f"Usar funcion avanzada:{configuracion['usar_funcion_avanzada']}")
+            print(
+                f"URL de inicio de sesion:{configuracion['url_inicio_de_sesion']}")
+            print(f"El usuario es: {configuracion['usuario']}")
+            print(f"La contraseña es: {configuracion['password']}")
             print(f"Descargar imágenes: {configuracion['descarga_imagenes']}")
-            print(f"Nombre de la carpeta de imágenes: {configuracion['nombre_carpeta_imagenes']}")
-            print(f"Número de comienzo de imágenes: {configuracion['numero_de_comienzo_imagenes']}")
+            print(
+                f"Nombre de la carpeta de imágenes: {configuracion['nombre_carpeta_imagenes']}")
+            print(
+                f"Nombre de las imagenes: {configuracion['nombre_imagenes']}")
+            print(
+                f"Número de comienzo de imágenes: {configuracion['numero_de_comienzo_imagenes']}")
             print(f"Obviar imagen: {configuracion['obviar_imagen']}")
             print(f"Ruta de imagen: {configuracion['ruta_de_imagen']}")
             print(f"Descargar videos: {configuracion['descarga_videos']}")
-            print(f"Nombre de la carpeta de medios: {configuracion['nombre_carpeta_medios']}")
-            print(f"Número de comienzo de videos: {configuracion['numero_de_comienzo_videos']}")
+            print(
+                f"Nombre de la carpeta de medios: {configuracion['nombre_carpeta_medios']}")
+            print(f"Nombre de los medios: {configuracion['nombre_medios']}")
+            print(
+                f"Número de comienzo de videos: {configuracion['numero_de_comienzo_videos']}")
+            print(f"Ruta de videos: {configuracion['ruta_videos']}")
+            print(f"Ruta de gifs: {configuracion['ruta_gifs']}")
             print(f"Comprimir archivos: {configuracion['comprimir_archivos']}")
             print(f"Nombre del archivo zip: {configuracion['nombre_zip']}")
-            print(f"Eliminar archivos fuente: {configuracion['eliminar_archivos_fuente']}")
-            print(f"Usar funcion avanzada:{configuracion['usar_funcion_avanzada']}")
+            print(
+                f"Eliminar archivos fuente: {configuracion['eliminar_archivos_fuente']}")
 
             # Confirmar que los valores son correctos
             print("Los valores son correctos? (Y/N) ")
             confirmacion = obtener_opcion_valida()
             if confirmacion:
-                return (configuracion["url_inicio_de_sesion"],
-                        configuracion["url_busqueda"],
-                        configuracion["descarga_imagenes"],
-                        configuracion["nombre_carpeta_imagenes"],
-                        configuracion["numero_de_comienzo_imagenes"],
-                        configuracion["obviar_imagen"],
-                        configuracion["ruta_de_imagen"],
-                        configuracion["descarga_videos"],
-                        configuracion["nombre_carpeta_medios"],
-                        configuracion["numero_de_comienzo_videos"],
-                        configuracion["comprimir_archivos"],
-                        configuracion["nombre_zip"],
-                        configuracion["eliminar_archivos_fuente"],
-                        configuracion["usar_funcion_avanzada"]
-                        )
+                return (
+                    configuracion["url_busqueda"],
+                    configuracion["usar_funcion_avanzada"],
+                    configuracion["url_inicio_de_sesion"],
+                    configuracion["usuario"],
+                    configuracion["password"],
+                    configuracion["descarga_imagenes"],
+                    configuracion["nombre_carpeta_imagenes"],
+                    configuracion["nombre_imagenes"],
+                    configuracion["numero_de_comienzo_imagenes"],
+                    configuracion["obviar_imagen"],
+                    configuracion["ruta_de_imagen"],
+                    configuracion["descarga_videos"],
+                    configuracion["nombre_carpeta_medios"],
+                    configuracion["nombre_medios"],
+                    configuracion["numero_de_comienzo_videos"],
+                    configuracion["ruta_videos"],
+                    configuracion["ruta_gifs"],
+                    configuracion["comprimir_archivos"],
+                    configuracion["nombre_zip"],
+                    configuracion["eliminar_archivos_fuente"],
+                )
             else:
                 return False
     except FileNotFoundError:
