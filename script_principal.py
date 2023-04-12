@@ -9,7 +9,7 @@ if opcional_0:
     try:
         para_buscar, opcional_1, url_login, usuario, password, opcional_2, nombre_carpeta_1, nombre_imagenes, numero_de_comienzo, verificar_imagen, ruta_imagenes, opcional_3, nombre_carpeta_2, nombre_archivos_2, numero_de_comienzo_2, ruta_videos, ruta_gif, opcional_4, nombre_zip, opcional_4_1 = funciones_interaccion.leer_configuracion()
     except TypeError:
-        print("ERROR: no de a encontrado configuraciones guardadas")
+        print("ERROR: no se a encontrado configuraciones guardadas")
         para_buscar, opcional_1, url_login, usuario, password, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
 else:
     para_buscar, opcional_1, url_login, usuario, password, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
