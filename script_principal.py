@@ -1,4 +1,4 @@
-# TODO: Depuración pendiente
+# TODO: Configurar el path para edge
 import scripts_funciones
 import funciones_interaccion
 
@@ -6,8 +6,10 @@ import funciones_interaccion
 print("Usar alguna configuracion guardada: [Y/N]")
 opcional_0 = funciones_interaccion.obtener_opcion_valida()
 if opcional_0:
-    para_buscar, opcional_1, url_login, usuario, password, opcional_2, nombre_carpeta_1, nombre_imagenes, numero_de_comienzo, verificar_imagen, ruta_imagenes, opcional_3, nombre_carpeta_2, nombre_archivos_2, numero_de_comienzo_2, ruta_videos, ruta_gif, opcional_4, nombre_zip, opcional_4_1 = funciones_interaccion.leer_configuracion()
-    if para_buscar == False:
+    try:
+        para_buscar, opcional_1, url_login, usuario, password, opcional_2, nombre_carpeta_1, nombre_imagenes, numero_de_comienzo, verificar_imagen, ruta_imagenes, opcional_3, nombre_carpeta_2, nombre_archivos_2, numero_de_comienzo_2, ruta_videos, ruta_gif, opcional_4, nombre_zip, opcional_4_1 = funciones_interaccion.leer_configuracion()
+    except TypeError:
+        print("ERROR: no de a encontrado configuraciones guardadas")
         para_buscar, opcional_1, url_login, usuario, password, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
 else:
     para_buscar, opcional_1, url_login, usuario, password, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
@@ -19,7 +21,7 @@ ruta_txt = "resultados/enlaces.txt"
 
 if opcional_1:
     scripts_funciones.obtener_todos_los_enlaces(
-        url_login, para_buscar, usuario, password
+        url_login, para_buscar, usuario, password, path=1
     )
     lista.append(para_buscar)
     lista.append(opcional_1)
