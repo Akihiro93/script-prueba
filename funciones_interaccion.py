@@ -35,6 +35,11 @@ def verificar_archivo():
                 return ruta
         print("Ruta de archivo inválida. Introduce una ruta válida.")
 
+def verificar_txt():
+    ruta = "resultados/enlaces.txt"
+    with open(ruta, 'w') as archivo:
+        pass
+
 
 def obtener_opcion_valida(opcion_exit=True):
     opciones_validas = ["Y", "N"]

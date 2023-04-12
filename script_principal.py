@@ -11,6 +11,7 @@ if opcional_0:
     except TypeError:
         print("ERROR: no se a encontrado configuraciones guardadas")
         para_buscar, opcional_1, url_login, usuario, password, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
+        opcional_0 = False
 else:
     para_buscar, opcional_1, url_login, usuario, password, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
 
@@ -35,6 +36,8 @@ else:
     lista.append(usuario)
     lista.append(password)
     lista.append(url_login)
+
+funciones_interaccion.verificar_txt()
 
 scripts_funciones.filtrar_enlaces(ruta_txt)
 scripts_funciones.corregir_enlaces_txt(ruta_txt)
@@ -101,7 +104,8 @@ else:
 if opcional_4 and (opcional_2 or opcional_3):
     if not opcional_0:
         nombre_zip = input("Nombre para el archivo zip: ")
-        print("¿Quiere que se eliminen los archivos fuente y sul carpetas[Y/N]:")
+        print(
+            "¿Quiere que se eliminen los archivos fuente y sul carpetas[Y/N]:")
         opcional_4_1 = funciones_interaccion.obtener_opcion_valida()
     scripts_funciones.comprimir_archivos(
         nombre_zip, ruta_imagenes, ruta_videos, ruta_gif)
