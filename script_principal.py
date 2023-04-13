@@ -17,6 +17,7 @@ else:
 
 lista = []
 
+funciones_interaccion.verificar_carpetas_base()
 ruta_txt = "resultados/enlaces.txt"
 
 
@@ -37,7 +38,7 @@ else:
     lista.append(password)
     lista.append(url_login)
 
-funciones_interaccion.verificar_txt()
+
 
 scripts_funciones.filtrar_enlaces(ruta_txt)
 scripts_funciones.corregir_enlaces_txt(ruta_txt)

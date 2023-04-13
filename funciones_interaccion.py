@@ -35,7 +35,20 @@ def verificar_archivo():
                 return ruta
         print("Ruta de archivo inválida. Introduce una ruta válida.")
 
-def verificar_txt():
+def verificar_carpetas_base():
+    # Comprobar si existe resultados
+    if not os.path.exists('resultados'):
+        os.makedirs('resultados')
+    #Comprobar si existe configuraciones
+    if not os.path.exists('configuraciones'):
+        os.makedirs('configuraciones')
+        ruta_json = "configuraciones/configuraciones.json"
+        with open(ruta_json, 'w') as archivo_json:
+            pass
+    #Comprobar si existe imagen obviar
+    if not os.path.exists('imagen_obviar'):
+        os.makedirs('imagen_obviar')
+    # Comprobar el txt enlaces
     ruta = "resultados/enlaces.txt"
     with open(ruta, 'w') as archivo:
         pass
