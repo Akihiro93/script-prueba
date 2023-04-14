@@ -99,7 +99,7 @@ else:
     lista.append(None)
     ruta_videos = None
     ruta_gif = None
-    nombre_archivos_2 = None
+    nombre_carpeta_2 = None
 
 
 if opcional_4 and (opcional_2 or opcional_3):
