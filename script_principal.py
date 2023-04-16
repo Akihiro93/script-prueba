@@ -1,4 +1,4 @@
-# TODO: Configurar el path para edge
+# TODO: Configurar el las opciones para el navegador obtener_parametros y en las configuraciones json
 import scripts_funciones
 import funciones_interaccion
 
@@ -7,13 +7,13 @@ print("Usar alguna configuracion guardada: [Y/N]")
 opcional_0 = funciones_interaccion.obtener_opcion_valida()
 if opcional_0:
     try:
-        para_buscar, opcional_1, url_login, usuario, password, opcional_2, nombre_carpeta_1, nombre_imagenes, numero_de_comienzo, verificar_imagen, ruta_imagenes, opcional_3, nombre_carpeta_2, nombre_archivos_2, numero_de_comienzo_2, ruta_videos, ruta_gif, opcional_4, nombre_zip, opcional_4_1 = funciones_interaccion.leer_configuracion()
+        para_buscar, opcional_1, url_login, usuario, password, path_election, ruta_navegador, opcional_2, nombre_carpeta_1, nombre_imagenes, numero_de_comienzo, verificar_imagen, ruta_imagenes, opcional_3, nombre_carpeta_2, nombre_archivos_2, numero_de_comienzo_2, ruta_videos, ruta_gif, opcional_4, nombre_zip, opcional_4_1 = funciones_interaccion.leer_configuracion()
     except TypeError:
         print("ERROR: no se a encontrado configuraciones guardadas")
-        para_buscar, opcional_1, url_login, usuario, password, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
+        para_buscar, opcional_1, url_login, usuario, password, path_election, ruta_navegador, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
         opcional_0 = False
 else:
-    para_buscar, opcional_1, url_login, usuario, password, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
+    para_buscar, opcional_1, url_login, usuario, password, path_election, ruta_navegador, opcional_2, opcional_3, opcional_4 = funciones_interaccion.obtener_parametros()
 
 lista = []
 
@@ -23,13 +23,15 @@ ruta_txt = "resultados/enlaces.txt"
 
 if opcional_1:
     scripts_funciones.obtener_todos_los_enlaces(
-        url_login, para_buscar, usuario, password, path=1
+        url_login, para_buscar, usuario, password, ruta_navegador, path_election
     )
     lista.append(para_buscar)
     lista.append(opcional_1)
     lista.append(usuario)
     lista.append(password)
     lista.append(url_login)
+    lista.append(ruta_navegador)
+    lista.append(path_election)
 else:
     scripts_funciones.obtener_enlaces(para_buscar)
     lista.append(para_buscar)
@@ -37,7 +39,8 @@ else:
     lista.append(usuario)
     lista.append(password)
     lista.append(url_login)
-
+    lista.append(ruta_navegador)
+    lista.append(path_election)
 
 
 scripts_funciones.filtrar_enlaces(ruta_txt)
@@ -106,7 +109,7 @@ if opcional_4 and (opcional_2 or opcional_3):
     if not opcional_0:
         nombre_zip = input("Nombre para el archivo zip: ")
         print(
-            "¿Quiere que se eliminen los archivos fuente y sul carpetas[Y/N]:")
+            "¿Quiere que se eliminen los archivos fuente y sud carpetas[Y/N]:")
         opcional_4_1 = funciones_interaccion.obtener_opcion_valida()
     scripts_funciones.comprimir_archivos(
         nombre_zip, ruta_imagenes, ruta_videos, ruta_gif)

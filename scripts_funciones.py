@@ -1,25 +1,24 @@
 import os
-import zipfile
-import shutil
-import io
 import requests
-from PIL import Image
-import imagehash
 from bs4 import BeautifulSoup
-import time
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 
 
-def obtener_todos_los_enlaces(url_1, url_2, usuario, password, path=1):
+def obtener_todos_los_enlaces(url_1, url_2, usuario, password, ruta_navegador=None, path=1):
+    # importar módulos necesarios
+    from selenium import webdriver
+    from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.common.exceptions import TimeoutException
+    import time
+    
     enlaces = []
 
     if path == 1:
-        chrome_driver_path = "C:\\Users\\kryst\\chromedriver_win32\\chromedriver.exe"
+        # controlador para chrome
+        chrome_driver_path = "path\chromedriver_win32\chromedriver.exe"
         options = webdriver.ChromeOptions()
         options.add_argument('--disable-extensions')
         options.add_argument('--incognito')
@@ -28,16 +27,18 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password, path=1):
     
     if path == 2:
         # configurar el controlador de Edge
-        print("no esta disponible")
-        exit()
+        edge_driver_path = 'path\edgedriver_win64\msedgedriver.exe'
+        edge_options = webdriver.EdgeOptions()
+        edge_options.use_chromium = True
+        driver = webdriver.Edge(
+            executable_path=edge_driver_path, options=edge_options)
 
-
-    if path == 3:
-        # configurar el controlador de Brave
-        brave_path = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
+    if path == 3 and ruta_navegador != None:
+        # configurar el controlador para basados en chromium
+        path_chromium = ruta_navegador
         brave_driver_path = "path\chromedriver_win32\chromedriver.exe"
         options = webdriver.ChromeOptions()
-        options.binary_location = brave_path
+        options.binary_location = path_chromium
         options.add_argument('--disable-extensions')
         options.add_argument('--incognito')
         driver = webdriver.Chrome(
@@ -55,6 +56,20 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password, path=1):
     password_1.send_keys(password)
     time.sleep(8)
 
+    # control de error al accionar el botón de login
+    try:
+        button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[name='Login']")))
+        button.click()
+    except TimeoutException:
+        while True:
+            from funciones_interaccion import obtener_opcion_valida
+            print("No se puede accionar el botón presione usted\nya lo acciono: Y/N")
+            confirmacion = obtener_opcion_valida()
+            if confirmacion:
+                break
+            else:
+                continue
+
     # obtener los enlaces guardados del usuario
     driver.get(url_2)
     time.sleep(8)
@@ -64,7 +79,7 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password, path=1):
         driver.execute_script(
             "window.scrollTo(0, document.body.scrollHeight);")
         # Esperar a que se cargue la página
-        time.sleep(2)
+        time.sleep(5)
         # Obtener el nuevo alto de la página
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
@@ -112,11 +127,13 @@ def filtrar_enlaces(ruta_txt):
     with open(ruta_txt, 'r') as file:
         rows = file.read().splitlines()
 
+# enlaces a filtrar
     filtered_rows = [row for row in rows if not (row.startswith('https://www.reddit.com/login') or any(link in row for link in ['https://www.redditinc.com/policies/user-agreement', 'https://www.redditinc.com/policies/privacy-policy',
     'https://www.redditinc.com/policies/content-policy', 'https://www.redditinc.com/policies/moderator-guidelines',
     'https://ads.reddit.com?utm_source=d2x_consumer&utm_name=top_nav_cta', 'https://www.reddit.com/chat'
     ]))]
 
+#sobre escribir el archivo
     with open(ruta_txt, "w") as f:
         f.write('\n'.join(filtered_rows))
 
@@ -124,6 +141,7 @@ def filtrar_enlaces(ruta_txt):
 
 
 def corregir_enlaces_txt(ruta_txt):
+    # verificar el archivo
     if not os.path.exists(ruta_txt):
         print(f"No se encontró el archivo en la ruta: {ruta_txt}")
         return
@@ -163,6 +181,11 @@ def eliminar_duplicados(ruta_txt):
 
 
 def descargar_imagenes(ruta_txt, carpeta_resultados='resultados', nombre_base='imagen', numero_inicial=1, umbral=5, imagen_comparar=None):
+    # importar módulos
+    from PIL import Image
+    import imagehash
+    import io
+
     # Crear carpeta para guardar las imágenes
     carpeta_imagenes = os.path.join('resultados', 'imagenes')
     if not os.path.exists(carpeta_imagenes):
@@ -258,6 +281,7 @@ def descargar_videos_gifs(ruta_txt, nombre_carpeta='carpeta_personalizada', nomb
 
 
 def comprimir_archivos(nombre_carpeta_comprimida, ruta_carpeta_imagenes='imagenes', ruta_carpeta_videos='videos', ruta_carpeta_gifs='gifs'):
+    import zipfile
 
     # Crear carpeta para guardar el archivo comprimido
     if not os.path.exists('resultados/' + nombre_carpeta_comprimida):
@@ -299,11 +323,15 @@ def comprimir_archivos(nombre_carpeta_comprimida, ruta_carpeta_imagenes='imagene
 
 
 def retirar_archivos(nombre_carpeta_1=None, nombre_carpeta_2=None):
+    import shutil
+
     contador = 0
+    #retirar la carpeta dentro de imagenes
     if nombre_carpeta_1 != None:
         shutil.rmtree("resultados/imagenes/" + nombre_carpeta_1)
         contador += 1
 
+# retirar la carpeta dentro de media
     if nombre_carpeta_2 != None:
         shutil.rmtree("resultados/media/" + nombre_carpeta_2)
         contador += 1
