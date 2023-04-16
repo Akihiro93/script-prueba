@@ -35,19 +35,17 @@ def verificar_archivo():
                 return ruta
         print("Ruta de archivo inválida. Introduce una ruta válida.")
 
+
 def verificar_carpetas_base():
     # Comprobar si existe resultados
     if not os.path.exists('resultados'):
         os.makedirs('resultados')
-    #Comprobar si existe configuraciones
+    # Comprobar si existe configuraciones
     if not os.path.exists('configuraciones'):
         os.makedirs('configuraciones')
         ruta_json = "configuraciones/configuraciones.json"
         with open(ruta_json, 'w') as archivo_json:
             pass
-    #Comprobar si existe imagen obviar
-    if not os.path.exists('imagen_obviar'):
-        os.makedirs('imagen_obviar')
     # Comprobar el txt enlaces
     ruta = "resultados/enlaces.txt"
     with open(ruta, 'w') as archivo:
@@ -70,23 +68,25 @@ def obtener_opcion_valida(opcion_exit=True):
                 "Opción inválida. Por favor ingresa una de las opciones siguientes: Y, N")
 
 
-def navegador_a_utilizar ():
-    print("Que navegador utilizas:\n1.Chrome\t2.Edge\t3.basado en chromium")
+def navegador_a_utilizar():
+    print("Que navegador utilizas:\n1.Chrome 2.Edge 3.basado en chromium")
     while True:
-        opcion = obtener_opcion_valida()
+        opcion = obtener_entero_positivo()
 
         if opcion == 3:
-            ruta = input("Introduce la ruta del ejecutable: ")
-            if not os.path.exists(ruta):
-                print("ERROR: El ejecutable no existe.")
-            else:
-                return (opcion, ruta)
+            while True:
+                ruta = input("Introduce la ruta del ejecutable del navegador: ")
+                if not os.path.exists(ruta):
+                    print("ERROR: El ejecutable no existe.")
+                else:
+                    return (opcion, ruta)
 
         elif opcion in (1, 2):
             return opcion, None
 
         else:
             print("Error: selección inválida.")
+
 
 def obtener_parametros():
     evasiones = 0
@@ -124,7 +124,7 @@ def obtener_parametros():
     else:
         opcional_4 = False
 
-    return para_buscar, opcional_1, url_login, usuario, password, opcional_2, opcional_3, opcional_4
+    return para_buscar, opcional_1, url_login, usuario, password, election, navegador, opcional_2, opcional_3, opcional_4
 
 
 def agregar_configuraciones(configuraciones):
@@ -137,7 +137,7 @@ def agregar_configuraciones(configuraciones):
 
 def crear_configuracion(lista):
     claves = [
-        "nombre", "url_busqueda", "usar_funcion_avanzada", "usuario", "password", "url_inicio_de_sesion",
+        "nombre", "url_busqueda", "usar_funcion_avanzada", "usuario", "password", "url_inicio_de_sesion", "ruta_navegador", "path",
         "descarga_imagenes", "nombre_carpeta_imagenes", "nombre_imagenes", "numero_de_comienzo_imagenes", "obviar_imagen", "ruta_de_imagen",
         "descarga_videos", "nombre_carpeta_medios", "nombre_medios", "numero_de_comienzo_videos", "ruta_videos", "ruta_gifs",
         "comprimir_archivos", "nombre_zip", "eliminar_archivos_fuente"
@@ -206,29 +206,40 @@ def leer_configuracion():
                     break
 
             # Imprimir los valores de la configuración seleccionada
-            
+
             print("Valores:")
             print(f"Nombre: {nombre_configuracion}")
             print(f"URL de búsqueda: {configuracion['url_busqueda']}")
-            print(f"Usar funcion avanzada:{configuracion['usar_funcion_avanzada']}")
-            print(f"URL de inicio de sesion:{configuracion['url_inicio_de_sesion']}")
+            print(
+                f"Usar funcion avanzada:{configuracion['usar_funcion_avanzada']}")
+            print(
+                f"URL de inicio de sesion:{configuracion['url_inicio_de_sesion']}")
+            print(f"La elección de el path: {configuracion['path']}")
+            print(
+                f"La ruta a el ejecutable del navegador: {configuracion['ruta_navegador']}")
             print(f"El usuario es: {configuracion['usuario']}")
             print(f"La contraseña es: {configuracion['password']}")
             print(f"Descargar imágenes: {configuracion['descarga_imagenes']}")
-            print(f"Nombre de la carpeta de imágenes: {configuracion['nombre_carpeta_imagenes']}")
-            print(f"Nombre de las imagenes: {configuracion['nombre_imagenes']}")
-            print(f"Número de comienzo de imágenes: {configuracion['numero_de_comienzo_imagenes']}")
+            print(
+                f"Nombre de la carpeta de imágenes: {configuracion['nombre_carpeta_imagenes']}")
+            print(
+                f"Nombre de las imagenes: {configuracion['nombre_imagenes']}")
+            print(
+                f"Número de comienzo de imágenes: {configuracion['numero_de_comienzo_imagenes']}")
             print(f"Obviar imagen: {configuracion['obviar_imagen']}")
             print(f"Ruta de imagen: {configuracion['ruta_de_imagen']}")
             print(f"Descargar videos: {configuracion['descarga_videos']}")
-            print(f"Nombre de la carpeta de medios: {configuracion['nombre_carpeta_medios']}")
+            print(
+                f"Nombre de la carpeta de medios: {configuracion['nombre_carpeta_medios']}")
             print(f"Nombre de los medios: {configuracion['nombre_medios']}")
-            print(f"Número de comienzo de videos: {configuracion['numero_de_comienzo_videos']}")
+            print(
+                f"Número de comienzo de videos: {configuracion['numero_de_comienzo_videos']}")
             print(f"Ruta de videos: {configuracion['ruta_videos']}")
             print(f"Ruta de gifs: {configuracion['ruta_gifs']}")
             print(f"Comprimir archivos: {configuracion['comprimir_archivos']}")
             print(f"Nombre del archivo zip: {configuracion['nombre_zip']}")
-            print(f"Eliminar archivos fuente: {configuracion['eliminar_archivos_fuente']}")
+            print(
+                f"Eliminar archivos fuente: {configuracion['eliminar_archivos_fuente']}")
 
             # Confirmar que los valores son correctos
             print("Los valores son correctos? (Y/N) ")
@@ -240,12 +251,14 @@ def leer_configuracion():
                     configuracion["url_inicio_de_sesion"],
                     configuracion["usuario"],
                     configuracion["password"],
+                    configuracion["path"],
+                    configuracion["ruta_navegador"],
                     configuracion["descarga_imagenes"],
                     configuracion["nombre_carpeta_imagenes"],
                     configuracion["nombre_imagenes"],
                     configuracion["numero_de_comienzo_imagenes"],
                     configuracion["obviar_imagen"],
-                    configuracion["ruta_de_imagen"],                    
+                    configuracion["ruta_de_imagen"],
                     configuracion["descarga_videos"],
                     configuracion["nombre_carpeta_medios"],
                     configuracion["nombre_medios"],
@@ -255,7 +268,7 @@ def leer_configuracion():
                     configuracion["comprimir_archivos"],
                     configuracion["nombre_zip"],
                     configuracion["eliminar_archivos_fuente"],
-                    )
+                )
             else:
                 pass
     except FileNotFoundError:
