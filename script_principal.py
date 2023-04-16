@@ -1,4 +1,4 @@
-# TODO: Configurar el path para edge
+# TODO: Configurar el las opciones para el navegador obtener_parametros y en las configuraciones json
 import scripts_funciones
 import funciones_interaccion
 
@@ -23,7 +23,7 @@ ruta_txt = "resultados/enlaces.txt"
 
 if opcional_1:
     scripts_funciones.obtener_todos_los_enlaces(
-        url_login, para_buscar, usuario, password, path=1
+        url_login, para_buscar, usuario, password, path=3
     )
     lista.append(para_buscar)
     lista.append(opcional_1)

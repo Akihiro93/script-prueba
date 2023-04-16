@@ -70,6 +70,24 @@ def obtener_opcion_valida(opcion_exit=True):
                 "Opción inválida. Por favor ingresa una de las opciones siguientes: Y, N")
 
 
+def navegador_a_utilizar ():
+    print("Que navegador utilizas:\n1.Chrome\t2.Edge\t3.basado en chromium")
+    while True:
+        opcion = obtener_opcion_valida()
+
+        if opcion == 3:
+            ruta = input("Introduce la ruta del ejecutable: ")
+            if not os.path.exists(ruta):
+                print("ERROR: El ejecutable no existe.")
+            else:
+                return (opcion, ruta)
+
+        elif opcion in (1, 2):
+            return opcion, None
+
+        else:
+            print("Error: selección inválida.")
+
 def obtener_parametros():
     evasiones = 0
     print("Introduce el enlace de la página")
@@ -82,10 +100,13 @@ def obtener_parametros():
         url_login = obtener_url_valida()
         usuario = input("Su usuario: ")
         password = input("La contraseña: ")
+        election, navegador = navegador_a_utilizar()
     else:
         url_login = None
         usuario = None
         password = None
+        election = None
+        navegador = None
 
     print("¿Quieres descargar las imágenes? [Y/N]:")
     opcional_2 = obtener_opcion_valida()
@@ -166,75 +187,77 @@ def leer_configuracion():
             return False
 
         # Imprimir el nombre de todas las configuraciones con un número de índice
-        print("Configuraciones:")
-        for i, nombre in enumerate(configuraciones):
-            print(f"{i+1}. {nombre}")
-
-        # Permitir al usuario seleccionar una configuración
         while True:
-            try:
-                seleccion = int(
-                    input("Selecciona una configuración: ")) - 1
-                nombre_configuracion = list(
-                    configuraciones.keys())[seleccion]
-                configuracion = configuraciones[nombre_configuracion]
-            except:
-                print("error introduce bien el numero")
+            print("Configuraciones:")
+            for i, nombre in enumerate(configuraciones):
+                print(f"{i+1}. {nombre}")
+
+            # Permitir al usuario seleccionar una configuración
+            while True:
+                try:
+                    seleccion = int(
+                        input("Selecciona una configuración: ")) - 1
+                    nombre_configuracion = list(
+                        configuraciones.keys())[seleccion]
+                    configuracion = configuraciones[nombre_configuracion]
+                except:
+                    print("error introduce bien el numero")
+                else:
+                    break
+
+            # Imprimir los valores de la configuración seleccionada
+            
+            print("Valores:")
+            print(f"Nombre: {nombre_configuracion}")
+            print(f"URL de búsqueda: {configuracion['url_busqueda']}")
+            print(f"Usar funcion avanzada:{configuracion['usar_funcion_avanzada']}")
+            print(f"URL de inicio de sesion:{configuracion['url_inicio_de_sesion']}")
+            print(f"El usuario es: {configuracion['usuario']}")
+            print(f"La contraseña es: {configuracion['password']}")
+            print(f"Descargar imágenes: {configuracion['descarga_imagenes']}")
+            print(f"Nombre de la carpeta de imágenes: {configuracion['nombre_carpeta_imagenes']}")
+            print(f"Nombre de las imagenes: {configuracion['nombre_imagenes']}")
+            print(f"Número de comienzo de imágenes: {configuracion['numero_de_comienzo_imagenes']}")
+            print(f"Obviar imagen: {configuracion['obviar_imagen']}")
+            print(f"Ruta de imagen: {configuracion['ruta_de_imagen']}")
+            print(f"Descargar videos: {configuracion['descarga_videos']}")
+            print(f"Nombre de la carpeta de medios: {configuracion['nombre_carpeta_medios']}")
+            print(f"Nombre de los medios: {configuracion['nombre_medios']}")
+            print(f"Número de comienzo de videos: {configuracion['numero_de_comienzo_videos']}")
+            print(f"Ruta de videos: {configuracion['ruta_videos']}")
+            print(f"Ruta de gifs: {configuracion['ruta_gifs']}")
+            print(f"Comprimir archivos: {configuracion['comprimir_archivos']}")
+            print(f"Nombre del archivo zip: {configuracion['nombre_zip']}")
+            print(f"Eliminar archivos fuente: {configuracion['eliminar_archivos_fuente']}")
+
+            # Confirmar que los valores son correctos
+            print("Los valores son correctos? (Y/N) ")
+            confirmacion = obtener_opcion_valida()
+            if confirmacion:
+                return (
+                    configuracion["url_busqueda"],
+                    configuracion["usar_funcion_avanzada"],
+                    configuracion["url_inicio_de_sesion"],
+                    configuracion["usuario"],
+                    configuracion["password"],
+                    configuracion["descarga_imagenes"],
+                    configuracion["nombre_carpeta_imagenes"],
+                    configuracion["nombre_imagenes"],
+                    configuracion["numero_de_comienzo_imagenes"],
+                    configuracion["obviar_imagen"],
+                    configuracion["ruta_de_imagen"],                    
+                    configuracion["descarga_videos"],
+                    configuracion["nombre_carpeta_medios"],
+                    configuracion["nombre_medios"],
+                    configuracion["numero_de_comienzo_videos"],
+                    configuracion["ruta_videos"],
+                    configuracion["ruta_gifs"],
+                    configuracion["comprimir_archivos"],
+                    configuracion["nombre_zip"],
+                    configuracion["eliminar_archivos_fuente"],
+                    )
             else:
-                break
-
-        # Imprimir los valores de la configuración seleccionada
-        print("Valores:")
-        print(f"Nombre: {nombre_configuracion}")
-        print(f"URL de búsqueda: {configuracion['url_busqueda']}")
-        print(f"Usar funcion avanzada:{configuracion['usar_funcion_avanzada']}")
-        print(f"URL de inicio de sesion:{configuracion['url_inicio_de_sesion']}")
-        print(f"El usuario es: {configuracion['usuario']}")
-        print(f"La contraseña es: {configuracion['password']}")
-        print(f"Descargar imágenes: {configuracion['descarga_imagenes']}")
-        print(f"Nombre de la carpeta de imágenes: {configuracion['nombre_carpeta_imagenes']}")
-        print(f"Nombre de las imagenes: {configuracion['nombre_imagenes']}")
-        print(f"Número de comienzo de imágenes: {configuracion['numero_de_comienzo_imagenes']}")
-        print(f"Obviar imagen: {configuracion['obviar_imagen']}")
-        print(f"Ruta de imagen: {configuracion['ruta_de_imagen']}")
-        print(f"Descargar videos: {configuracion['descarga_videos']}")
-        print(f"Nombre de la carpeta de medios: {configuracion['nombre_carpeta_medios']}")
-        print(f"Nombre de los medios: {configuracion['nombre_medios']}")
-        print(f"Número de comienzo de videos: {configuracion['numero_de_comienzo_videos']}")
-        print(f"Ruta de videos: {configuracion['ruta_videos']}")
-        print(f"Ruta de gifs: {configuracion['ruta_gifs']}")
-        print(f"Comprimir archivos: {configuracion['comprimir_archivos']}")
-        print(f"Nombre del archivo zip: {configuracion['nombre_zip']}")
-        print(f"Eliminar archivos fuente: {configuracion['eliminar_archivos_fuente']}")
-
-        # Confirmar que los valores son correctos
-        print("Los valores son correctos? (Y/N) ")
-        confirmacion = obtener_opcion_valida()
-        if confirmacion:
-            return (
-                configuracion["url_busqueda"],
-                configuracion["usar_funcion_avanzada"],
-                configuracion["url_inicio_de_sesion"],
-                configuracion["usuario"],
-                configuracion["password"],
-                configuracion["descarga_imagenes"],
-                configuracion["nombre_carpeta_imagenes"],
-                configuracion["nombre_imagenes"],
-                configuracion["numero_de_comienzo_imagenes"],
-                configuracion["obviar_imagen"],
-                configuracion["ruta_de_imagen"],                    
-                configuracion["descarga_videos"],
-                configuracion["nombre_carpeta_medios"],
-                configuracion["nombre_medios"],
-                configuracion["numero_de_comienzo_videos"],
-                configuracion["ruta_videos"],
-                configuracion["ruta_gifs"],
-                configuracion["comprimir_archivos"],
-                configuracion["nombre_zip"],
-                configuracion["eliminar_archivos_fuente"],
-                )
-        else:
-            return False
+                pass
     except FileNotFoundError:
         print("El archivo de configuraciones no existe.")
         return False
