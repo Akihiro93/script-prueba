@@ -14,18 +14,34 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-def obtener_todos_los_enlaces(url_1, url_2, usuario, password):
+
+def obtener_todos_los_enlaces(url_1, url_2, usuario, password, path=1):
     enlaces = []
 
-    # configurar el controlador de Brave
-    brave_path = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
-    brave_driver_path = "C:\\Users\\kryst\\chromedriver_win32\\chromedriver.exe"
-    options = webdriver.ChromeOptions()
-    options.binary_location = brave_path
-    options.add_argument('--disable-extensions')
-    options.add_argument('--incognito')
-    driver = webdriver.Chrome(
-        options=options, executable_path=brave_driver_path)
+    if path == 1:
+        chrome_driver_path = "C:\\Users\\kryst\\chromedriver_win32\\chromedriver.exe"
+        options = webdriver.ChromeOptions()
+        options.add_argument('--disable-extensions')
+        options.add_argument('--incognito')
+        driver = webdriver.Chrome(
+            options=options, executable_path=chrome_driver_path)
+    
+    if path == 2:
+        # configurar el controlador de Edge
+        print("no esta disponible")
+        exit()
+
+
+    if path == 3:
+        # configurar el controlador de Brave
+        brave_path = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
+        brave_driver_path = "path\chromedriver_win32\chromedriver.exe"
+        options = webdriver.ChromeOptions()
+        options.binary_location = brave_path
+        options.add_argument('--disable-extensions')
+        options.add_argument('--incognito')
+        driver = webdriver.Chrome(
+            options=options, executable_path=brave_driver_path)
 
     # iniciar sesión
     driver.get(url_1)
