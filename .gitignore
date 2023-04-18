@@ -4,7 +4,7 @@ __pycache__
 Pruebas.ipynb
 imagen_obviar
 configuraciones
-bin
+/bin/script_principal
 dist
 build
 script_principal.spec
