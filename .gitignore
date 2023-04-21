@@ -1,10 +1,21 @@
-﻿resultados
+﻿# carpetas para la ejecucion
+resultados
+configuraciones
+imagen_obviar
+
+#del vscode
 __pycache__
 .vscode
+
+#del jupyter
 Pruebas.ipynb
-imagen_obviar
-configuraciones
-bin
+
+# de compilacion
 dist
 build
 script_principal.spec
+/bin/script_principal
+
+# los paths path
+path/edgedriver_win64
+path/chromedriver_win32
