@@ -1,4 +1,4 @@
-# TODO: Configurar el las opciones para el navegador obtener_parametros y en las configuraciones json
+# TODO: Configurar el driver para Firefox
 import scripts_funciones
 import funciones_interaccion
 
