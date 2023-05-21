@@ -16,6 +16,6 @@ build
 script_principal.spec
 /bin/script_principal
 
-# los paths path
+# los archivos path
 path/edgedriver_win64
 path/chromedriver_win32
