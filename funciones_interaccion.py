@@ -135,13 +135,8 @@ def agregar_configuraciones(configuraciones):
     print("Configuraciones agregadas exitosamente!")
 
 
-def crear_configuracion(lista):
-    claves = [
-        "nombre", "url_busqueda", "usar_funcion_avanzada", "usuario", "password", "url_inicio_de_sesion", "ruta_navegador", "path",
-        "descarga_imagenes", "nombre_carpeta_imagenes", "nombre_imagenes", "numero_de_comienzo_imagenes", "obviar_imagen", "ruta_de_imagen",
-        "descarga_videos", "nombre_carpeta_medios", "nombre_medios", "numero_de_comienzo_videos", "ruta_videos", "ruta_gifs",
-        "comprimir_archivos", "nombre_zip", "eliminar_archivos_fuente"
-    ]
+def crear_configuracion(
+    nombre, url_busqueda, func_avanzada, usuario, password, url_inicio_sesion, ruta_navegador, path, descarga_imagenes, carpeta_imagenes, nombre_imagenes, n_comienzo1, obviar, ruta_imagen, descarga_videos, carpeta_medios, nombre_medios, n_comienzo2, ruta_videos, ruta_gifs, comprimir, nombre_zip, eliminar_fuente):
 
     # Verificar si existe la carpeta "configuraciones"
     if not os.path.exists("configuraciones"):
@@ -161,12 +156,12 @@ def crear_configuracion(lista):
                 configuraciones = json.load(f)
     except json.decoder.JSONDecodeError:
         configuraciones = {}
-
-    # Crear una nueva configuración con la lista de valores
-    configuracion = {}
-    for i, valor in enumerate(lista):
-        clave = claves[i]
-        configuracion[clave] = valor
+    
+    configuracion = {"nombre":nombre, "url_busqueda":url_busqueda, "usar_funcion_avanzada":func_avanzada, "usuario":usuario, "password":password, "url_inicio_de_sesion":url_inicio_sesion, "ruta_navegador":ruta_navegador, "path":path,
+        "descarga_imagenes":descarga_imagenes, "nombre_carpeta_imagenes":carpeta_imagenes, "nombre_imagenes":nombre_imagenes, "numero_de_comienzo_imagenes":n_comienzo1, "obviar_imagen":obviar, "ruta_de_imagen":ruta_imagen,
+        "descarga_videos":descarga_videos, "nombre_carpeta_medios":carpeta_medios, "nombre_medios":nombre_medios, "numero_de_comienzo_videos":n_comienzo2, "ruta_videos":ruta_videos, "ruta_gifs":ruta_gifs,
+        "comprimir_archivos":comprimir, "nombre_zip":nombre_zip, "eliminar_archivos_fuente":eliminar_fuente
+    }
 
     # Agregar la nueva configuración a la lista de configuraciones
     configuraciones[configuracion["nombre"]] = configuracion
