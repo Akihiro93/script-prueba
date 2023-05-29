@@ -4,7 +4,6 @@ configuraciones
 imagen_obviar
 
 #del vscode
-__pycache__
 .vscode
 
 #del jupyter
@@ -16,6 +15,12 @@ build
 script_principal.spec
 /bin/script_principal
 
-# los archivos path
+# los archivos path-windows
 path/edgedriver_win64
 path/chromedriver_win32
+
+# los archivos path-linux 
+path/chromedriver
+
+# binarios de python
+lib/__pycache__
