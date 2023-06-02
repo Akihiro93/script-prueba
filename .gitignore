@@ -21,6 +21,8 @@ path/chromedriver_win32
 
 # los archivos path-linux 
 path/chromedriver
+path/geckodriver
+path/msedgedriver
 
 # binarios de python
 lib/__pycache__

@@ -1,4 +1,3 @@
-# TODO: Configurar el driver para Firefox
 from lib import interaccion, enlaces, ficheros, json
 
 

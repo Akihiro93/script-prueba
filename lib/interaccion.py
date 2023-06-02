@@ -42,19 +42,22 @@ def obtener_opcion_valida(opcion_exit=True):
 
 
 def navegador_a_utilizar():
-    print("Que navegador utilizas:\n1.Chrome 2.Edge 3.basado en chromium")
+    print("Que navegador utilizas:\n1.Chrome 2.Edge 3.Firefox 4.Basado en chromium")
     while True:
         opcion = obtener_entero_positivo()
 
-        if opcion == 3:
+        if opcion == 4:
             while True:
                 ruta = input("Introduce la ruta del ejecutable del navegador: ")
-                if not os.path.exists(ruta):
+                if ruta == "exit":
+                    break
+                elif not os.path.exists(ruta):
                     print("ERROR: El ejecutable no existe.")
                 else:
                     return (opcion, ruta)
+                continue
 
-        elif opcion in (1, 2):
+        elif opcion in (1, 3):
             return opcion, None
 
         else:

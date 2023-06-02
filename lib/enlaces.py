@@ -19,8 +19,12 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password, ruta_navegador=No
     enlaces = []
 
     if platform.system == "Windows":
-        extension = ".exe"
-        name = "_win32"
+        if  path != 2:
+            extension = ".exe"
+            name = "_win32"
+        else:
+            extension = ".exe"
+            name = "_win64"
     else:
         extension = ""
         name = ""
@@ -34,15 +38,15 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password, ruta_navegador=No
         driver = webdriver.Chrome(
             options=options, executable_path=chrome_driver_path)
     
-    if path == 2:
+    elif path == 2:
         # configurar el controlador de Edge
-        edge_driver_path = 'path\edgedriver_win64\msedgedriver.exe'
+        edge_driver_path = f"path\edgedriver{name}\msedgedriver{extension}"
         edge_options = webdriver.EdgeOptions()
         edge_options.use_chromium = True
         driver = webdriver.Edge(
             executable_path=edge_driver_path, options=edge_options)
 
-    if path == 3 and ruta_navegador != None:
+    elif path == 4 and ruta_navegador != None:
         # configurar el controlador para basados en chromium
         path_chromium = ruta_navegador
         brave_driver_path = f"path\chromedriver{name}\chromedriver{extension}"
@@ -53,8 +57,14 @@ def obtener_todos_los_enlaces(url_1, url_2, usuario, password, ruta_navegador=No
         driver = webdriver.Chrome(
             options=options, executable_path=brave_driver_path)
     
-    if path == 4:
-        options = webdriver.Firefox()
+    elif path == 3:
+        firefox_driver_path = f"path/geckodriver{name}/geckodriver{extension}"
+        options = webdriver.FirefoxOptions()
+        options.add_argument('--disable-extensions')
+        options.add_argument('--incognito')
+        driver = webdriver.Firefox(
+            options=options, executable_path=firefox_driver_path
+        )
 
     # iniciar sesión
     driver.get(url_1)
