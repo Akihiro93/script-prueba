@@ -1,7 +1,6 @@
 import os
 from bs4 import BeautifulSoup
 import requests
-from bs4 import BeautifulSoup
 
 
 def obtener_todos_los_enlaces(url_1, url_2, usuario, password, ruta_navegador=None, path=1):
