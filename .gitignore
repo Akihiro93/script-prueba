@@ -23,6 +23,7 @@ path/chromedriver_win32
 path/chromedriver
 path/geckodriver
 path/msedgedriver
+geckodriver.log
 
 # binarios de python
 lib/__pycache__
